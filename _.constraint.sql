@@ -1,0 +1,1 @@
+-- contraintes des tables de la base de donnee
