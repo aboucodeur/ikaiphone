@@ -16,7 +16,9 @@ return new class extends Migration
             $table->string('f_nom', 100);
             $table->string('f_tel', 25);
             $table->string('f_adr', 200);
-            $table->timestamps();
+            $table->timestamps(); // [created|updated]_at
+            // suppression en douce
+            $table->softDeletes();
         });
     }
 

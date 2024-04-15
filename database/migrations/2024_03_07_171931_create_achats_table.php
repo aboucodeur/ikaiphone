@@ -16,7 +16,6 @@ return new class extends Migration
             $table->dateTime('a_date');
             $table->integer('a_etat');
             $table->unsignedBigInteger('f_id');
-
             // Clé étrangère
             $table->foreign('f_id')->references('f_id')->on('fournisseurs');
             $table->timestamps();

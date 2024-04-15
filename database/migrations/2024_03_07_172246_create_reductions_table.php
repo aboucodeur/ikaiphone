@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('r_nom', 50)->unique();
             $table->char('r_type', 3)->nullable(); // remise ou rabais
             $table->decimal('r_pourcentage', 15, 2);
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
         });
     }
 

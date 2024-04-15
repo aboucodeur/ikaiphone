@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('vreductions', function (Blueprint $table) {
             $table->id('vr_id');
-            $table->integer('vr_etat');
+            $table->integer('vr_etat')->default(0);
             $table->unsignedBigInteger('r_id');
             $table->foreign('r_id')->references('r_id')->on('reductions');
             $table->timestamps();

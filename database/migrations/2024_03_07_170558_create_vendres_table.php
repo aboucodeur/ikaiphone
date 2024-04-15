@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('vendres', function (Blueprint $table) {
             $table->id('v_id');
-            $table->dateTime('v_date');
+            $table->dateTime('v_date')->default('now');
             $table->char('v_type', 3); // type de vente : classique ou re-vendeur
             $table->integer('v_etat');
             $table->timestamps();

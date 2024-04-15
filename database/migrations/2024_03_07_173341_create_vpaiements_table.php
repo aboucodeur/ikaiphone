@@ -16,8 +16,12 @@ return new class extends Migration
             $table->string('vp_motif', 200);
             $table->dateTime('vp_date');
             $table->integer('vp_montant');
-            $table->string('v_id', 50);            
+            $table->smallInteger('vp_etat')->default(0);
+            $table->unsignedBigInteger('v_id');
+            $table->unsignedBigInteger('i_id');
+            // cle etrangere de la table
             $table->foreign('v_id')->references('v_id')->on('vendres');
+            $table->foreign('i_id')->references('i_id')->on('iphones');
             $table->timestamps();
         });
     }

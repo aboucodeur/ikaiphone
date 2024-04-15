@@ -1,6 +1,6 @@
 -- Ne pas toucher la table utilisateur d'abord
 CREATE TABLE Users(
-   u_id COUNTER,
+   u_id SERIAL PRIMARY KEY,
    u_prenom VARCHAR(60),
    u_nom VARCHAR(30),
    u_type VARCHAR(6),
@@ -12,7 +12,7 @@ CREATE TABLE Users(
 
 -- Tables modeles
 CREATE TABLE Modeles(
-   m_id COUNTER,
+   m_id SERIAL PRIMARY KEY,
    m_nom VARCHAR(60) NOT NULL,
    m_couleur VARCHAR(100) NOT NULL,
    m_type VARCHAR(25) NOT NULL,
@@ -26,9 +26,10 @@ CREATE TABLE Modeles(
    UNIQUE(m_nom)
 );
 
+
 -- Tables iphones
 CREATE TABLE Iphone(
-   i_id COUNTER,
+   i_id SERIAL PRIMARY KEY,
    i_nom VARCHAR(100) NOT NULL,
    i_serie VARCHAR(200) NOT NULL,
    i_barcode VARCHAR(100) NOT NULL,
@@ -44,7 +45,7 @@ CREATE TABLE Iphone(
 
 -- Table Fournisseurs
 CREATE TABLE Fournisseurs(
-   f_id COUNTER,
+   f_id SERIAL PRIMARY KEY,
    f_nom VARCHAR(100) NOT NULL,
    f_tel VARCHAR(25) NOT NULL,
    f_adr VARCHAR(200) NOT NULL,
@@ -53,10 +54,9 @@ CREATE TABLE Fournisseurs(
    UNIQUE(f_tel)
 );
 
-
 -- Table Clients
 CREATE TABLE Clients(
-   c_id COUNTER,
+   c_id SERIAL PRIMARY KEY,
    c_nom VARCHAR(100) NOT NULL,
    c_tel VARCHAR(25) NOT NULL,
    c_adr VARCHAR(200) NOT NULL,
@@ -67,9 +67,9 @@ CREATE TABLE Clients(
 );
 
 
--- Tables vendes
+-- Tables vendres
 CREATE TABLE Vendres(
-   v_id VARCHAR(50),
+   v_id SERIAL PRIMARY KEY,
    v_date DATETIME,
    v_type CHAR(3),
    v_etat INT,
@@ -78,9 +78,13 @@ CREATE TABLE Vendres(
    FOREIGN KEY(c_id) REFERENCES Clients(c_id)
 );
 
+-- La date est par defaut
+-- Type de vente sim ou rev
+-- Etat de la vente : en cours, en revente, valider
+
 -- Table Achats
 CREATE TABLE Achats(
-   a_id VARCHAR(50),
+   a_id SERIAL PRIMARY KEY,
    a_date DATETIME,
    a_etat INT,
    f_id INT NOT NULL,
@@ -107,13 +111,13 @@ CREATE TABLE Vreductions(
    FOREIGN KEY(r_id) REFERENCES Reductions(r_id)
 );
 
--- Table Vpaiements
+-- Table Vpaiements en cours
 CREATE TABLE Vpaiements(
-   vp_id VARCHAR(50),
+   vp_id SERIAL PRIMARY KEY,
    vp_motif VARCHAR(200) NOT NULL,
    vp_date DATETIME,
    vp_montant INT,
-   v_id VARCHAR(50) NOT NULL,
+   v_id SERIAL PRIMARY KEY NOT NULL,
    PRIMARY KEY(vp_id),
    FOREIGN KEY(v_id) REFERENCES Vendres(v_id)
 );
@@ -124,7 +128,6 @@ CREATE TABLE Acommandes(
    ac_id INT,
    i_id INT,
    a_id INT,
-   ac_id INT,
    ac_etat INT,
    ac_qte DECIMAL(15,2),
    ac_prix DECIMAL(15,2),
@@ -133,6 +136,8 @@ CREATE TABLE Acommandes(
    FOREIGN KEY(a_id) REFERENCES Achats(a_id)
 );
 
+
+-- Table Vcommandes
 CREATE TABLE Vcommandes(
    vc_id INT,
    i_id INT,
@@ -147,6 +152,7 @@ CREATE TABLE Vcommandes(
    FOREIGN KEY(v_id) REFERENCES Vendres(v_id)
 );
 
+-- Table Appliquer
 CREATE TABLE Appliquer(
    ap_id INT,
    v_id INT,
@@ -155,3 +161,4 @@ CREATE TABLE Appliquer(
    FOREIGN KEY(v_id) REFERENCES Vendres(v_id),
    FOREIGN KEY(vr_id) REFERENCES Vreductions(vr_id)
 );
+

@@ -13,11 +13,14 @@ return new class extends Migration
     {
         Schema::create('clients', function (Blueprint $table) {
             $table->id('c_id');
-            $table->string('c_nom',100);
-            $table->string('c_tel',25);
-            $table->string('c_adr',25);
-            $table->string('c_type',50);
-            $table->timestamps();
+            $table->string('c_nom', 100);
+            $table->string('c_tel', 25);
+            $table->string('c_adr', 200);
+            // simple ou revendeur
+            $table->string('c_type', 10);
+            $table->timestamps(); // [created|updated]_at
+            // suppression en douce
+            $table->softDeletes();
         });
     }
 
