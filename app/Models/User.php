@@ -22,9 +22,9 @@ class User extends Authenticatable
         'u_nom',
         'u_type',
         'u_username',
-        // 'name',
         'email',
         'password',
+        'en_id'
     ];
 
     /**
@@ -46,4 +46,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function entreprise()
+    {
+        return $this->belongsTo(Entreprise::class, 'en_id');
+    }
 }

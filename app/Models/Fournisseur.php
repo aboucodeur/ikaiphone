@@ -17,10 +17,16 @@ class Fournisseur extends Model
         'f_nom',
         'f_tel',
         'f_adr',
+        'en_id'
     ];
 
     public function achats()
     {
         return $this->hasMany(Achat::class, 'f_id', 'f_id');
+    }
+
+    public function entreprise()
+    {
+        return $this->belongsTo(Entreprise::class, 'en_id');
     }
 }

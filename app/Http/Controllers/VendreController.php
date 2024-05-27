@@ -12,16 +12,24 @@ use Illuminate\Support\Facades\DB;
 
 class VendreController extends Controller
 {
+    // ! fix : Affiche les ventes de l'entreprise donnee !
     public function index()
     {
-        $vendres = Vendre::query()->latest('created_at')->get();
-        $clients = Client::withTrashed()->latest('created_at')->orderBy('c_type')->get();
+        $en_id = auth()->user()->en_id;
+        $clients = Client::query()->latest('created_at')->where('en_id', '=', $en_id)->orderBy('c_type')->get();
+        $vendres = Vendre::with(['client'])->whereHas('client', function ($query) use ($en_id) {
+            $query->where('en_id', '=', $en_id);
+        })->get();
+
         return view('pages.vendre.index', compact('vendres', 'clients'));
     }
 
+    // ! fix : Affiche les clients de l'entreprise donnee !
     public function create()
     {
-        $clients = Client::withTrashed()->latest('created_at')->orderBy('c_type')->get();
+        // $clients = Client::withTrashed()->latest('created_at')->orderBy('c_type')->get();
+        $en_id = auth()->user()->en_id;
+        $clients = Client::query()->latest('created_at')->where('en_id', '=', $en_id)->orderBy('c_type')->get();
         return view('pages.vendre.create', compact('clients'));
     }
 
@@ -43,9 +51,11 @@ class VendreController extends Controller
         return redirect()->route('vendre.show', $v);
     }
 
+    // ! fix : Affiche les clients de l'entreprise donnee !
     public function edit(Vendre $vendre)
     {
-        $clients = Client::withTrashed()->latest('created_at')->get();
+        $en_id = auth()->user()->en_id;
+        $clients = Client::query()->latest('created_at')->where('en_id', '=', $en_id)->orderBy('c_type')->get();
         return view('pages.vendre.edit', compact('vendre', 'clients'));
     }
 
@@ -65,16 +75,26 @@ class VendreController extends Controller
         return redirect()->route('vendre.index');
     }
 
+    // ! fix : Affiche les iphones de l'entreprise donnee !
     public function show(Vendre $vendre)
     {
+        $en_id = auth()->user()->en_id;
         $paniers = $vendre?->iphones;
+        $datas_iphones = [];
 
-        $datas_iphones = []; // seulement les bonne iphones !
         $ids = $vendre->iphones()->pluck('iphones.i_id');
-        $vids = Iphone::withCount('ventes')->get()->where('ventes_count', '>', 0)->pluck('i_id');
-        $rids = Iphone::withCount('retour')->get()->where('retour_count', '>', 0)->pluck('i_ech_id');
-        $dont_show = [...$ids, ...$vids, ...$rids];
-        $iphones = Iphone::query()->latest('created_at')->whereNotIn('iphones.i_id', [...$dont_show])->get();
+        $vids = Iphone::whereHas('modele', function ($query) use ($en_id) {
+            $query->where('en_id', $en_id);
+        })->withCount('ventes')->get()->where('ventes_count', '>', 0)->pluck('i_id');
+        $rids = Iphone::whereHas('modele', function ($query) use ($en_id) {
+            $query->where('en_id', $en_id);
+        })->withCount('retour')->get()->where('retour_count', '>', 0)->pluck('i_ech_id');
+        $dont_show = [...$ids, ...$vids, ...$rids]; // ids des iphones non disponibles
+
+        $iphones = Iphone::whereHas('modele', function ($query) use ($en_id) {
+            $query->where('en_id', $en_id);
+        })->latest('created_at')->whereNotIn('iphones.i_id', [...$dont_show])->get(); // iphones disponibles
+
 
         foreach ($iphones as $key => $iphone) {
             if ($iphone->modele) {
@@ -86,7 +106,6 @@ class VendreController extends Controller
                     'memoire' => $iphone->modele->m_memoire,
                     'qte' => $iphone->modele->m_qte,
                     'prix' => $iphone->modele->m_prix,
-                    'couleur' => $iphone->modele->m_couleur,
                 ];
             }
         }
@@ -94,21 +113,24 @@ class VendreController extends Controller
         return view('pages.vendre.show', compact('vendre', 'iphones', 'paniers', 'datas_iphones'));
     }
 
-    // Ajouter la commande de vente (pivot)
+    // ! fix : AJOUTER UNE COMMANDE DE VENTE A LA VENTE !
     public function addCommande(Request $request, Vendre $vendre)
     {
+        $en_id = auth()->user()->en_id;
         $datas = $request->validate([
             'prix' => ['numeric', 'required'],
-            'vbarcode' => ['required']
+            'vbarcode' => ['required'],
+            // 'color' => ['required']
         ]);
 
-        $iphone = Iphone::query()->where('i_barcode', '=', $datas['vbarcode'])->first();
-
-        // via eloquent je peux joindre les deux avec leur pivot
+        $iphone = Iphone::whereHas('modele', function ($query) use ($en_id) {
+            $query->where('en_id', $en_id);
+        })->where('i_barcode', '=', $datas['vbarcode'])->first();
         $vendre->iphones()->attach($iphone->i_id, [
             'vc_etat' => 0,
             'vc_qte' => 1,
             'vc_prix' => $datas['prix'],
+            // 'vc_color' => $datas['color'],
             'created_at' => now(),
             'updated_at' => now()
         ]);
@@ -116,14 +138,12 @@ class VendreController extends Controller
         return redirect()->back();
     }
 
-    // Supprimer la commande de vente (pivot)
     public function remCommande(Request $request, Vendre $vendre)
     {
         $vendre->iphones()->detach([$request->input('i_id')]);
         return redirect()->back();
     }
 
-    // Valider la vente
     public function validCommande(Vendre $vendre)
     {
         $type_vente = $vendre->v_type;
@@ -181,13 +201,7 @@ class VendreController extends Controller
         }
     }
 
-    /**
-     *
-     * PAIEMENTS DE LA VENTE
-     *
-     */
-
-    // afficher les paiement de l'iphone et de la vente
+    /** PAIEMENT */
     public function paiementPage(Vendre $vendre, Iphone $iphone)
     {
         $commandes = $vendre->iphones;
@@ -195,11 +209,8 @@ class VendreController extends Controller
         return view('pages.vendre.paiement', compact('vendre', 'iphone', 'paiements'));
     }
 
-    // ajouter un paiement pour la vente et l'iphone
     public function addPaiement(Request $request, Vendre $vendre)
     {
-        // ! En programmation il ne faut avoir jamais peur et bien faire c'est un temps gagner deux fois
-
         $v_id = $vendre->v_id;
         $datas = $request->validate([
             'vp_motif' => ['required'],
@@ -207,9 +218,7 @@ class VendreController extends Controller
             'i_id' => ['required', 'exists:iphones,i_id']
         ]);
 
-        // infos_de paiement de la commande
         $p = VendreHelper::paiementCommande($vendre->iphones()->findOrFail($datas['i_id']));
-
         if ($datas['vp_montant'] <= $p['creste']) {
             $datas['v_id'] = $v_id;
             $datas['vp_date'] = now();
@@ -219,14 +228,12 @@ class VendreController extends Controller
         return redirect()->back();
     }
 
-    // valider un paiement pour la vente et l'iphone
     public function validPaiement(Vpaiement $vpaiement)
     {
         $vpaiement->update(['vp_etat' => 1]);
         return redirect()->back();
     }
 
-    // supprimer un paiement pour la vente et l'iphone
     public function remPaiement(Vpaiement $vpaiement)
     {
         $vpaiement->delete();

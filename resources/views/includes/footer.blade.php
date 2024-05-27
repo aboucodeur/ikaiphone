@@ -8,6 +8,7 @@
 <!-- Data Tables -->
 <script src="/assets/libs/datatables/media/js/jquery.dataTables.min.js"></script>
 <script src="/assets/libs/datatables.net-bs5/js/dataTables.bootstrap5.min.js"></script>
+{{-- <script src="/assets/libs/datatables.net-responsive/js/dataTables.responsive.min.js"></script> --}}
 
 <!-- Theme JS -->
 <script src="/assets/js/theme.min.js"></script>
@@ -15,4 +16,5 @@
 <script src="/assets/js/vendors/chart.js"></script>
 
 <!-- Scripts tiers -->
+<script src="/assets/libs/htmx/htmx.min.js"></script>
 <script type="module" src="/assets/js/app.js"></script>

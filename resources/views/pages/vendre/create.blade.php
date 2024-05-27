@@ -7,7 +7,7 @@
                     value="{{ old('v_date', date('Y-m-d')) }}" required />
             </div>
         </div>
-        <div class="col-lg-6">
+        <div class="col-lg-3">
             <div class="mb-3">
                 <select class="form-select" id="c_id" name="c_id" required>
                     <option value="">Sélectionner un client</option>
@@ -20,7 +20,25 @@
             </div>
         </div>
         <div class="col-lg-3">
-            <button type="submit" class="btn btn-secondary w-100">Valider</button>
+            <button type="submit" class="btn btn-success w-100">
+                {{-- image add svg icon --}}
+                <img src="/assets/images/svg/package-check.svg" alt="Package check icon">
+            </button>
+        </div>
+        <div class="col-lg-3">
+            {{ \App\Helpers\ModalHelper::trigger('addClient', '<i class="bi bi-plus-circle-fill"></i> CLIENTS', 'btn btn-primary w-100') }}
         </div>
     </div>
 </form>
+
+@extends('includes.modal', [
+    'id' => 'addClient',
+    'fid' => 'faddClient',
+    'title' => 'ACTION RAPIDE',
+    'fmethod' => 'POST',
+    'faction' => route('vendre.client.fast'),
+    'b2Type' => 'submit',
+])
+@section('content_addClient')
+    @include('pages.client.create')
+@endsection

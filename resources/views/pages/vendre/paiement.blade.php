@@ -11,12 +11,17 @@
 
 @section('fpanier')
     <div class="row">
-        <div class="col-lg-12 mb-3">
+        <div class="col-lg-6 mb-3">
             <a class="btn btn-sm btn-primary" href="{{ route('vendre.show', $vendre) }}" role="button">
                 <i class="bi bi-arrow-left"></i>
                 Retour
             </a>
+            <a class="btn btn-sm btn-primary" href="{{ route('paiement.index') }}" role="button">
+                <i class="bi bi-arrow-left"></i>
+                Retour dans paiements
+            </a>
         </div>
+
 
         @if ($p['creste'] > 0)
             <div class="col-lg-12 mb-3">

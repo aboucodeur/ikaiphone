@@ -22,13 +22,15 @@
                         <div id="info_vente"></div>
                     </div>
                 </div>
-                <div class="col-lg-5">
+
+                <div class="col-lg-3">
                     <div class="mb-3">
                         <label for="s_iphone_prix" class="form-label">Prix</label>
                         <input type="number" class="form-control" id="s_iphone_prix" name="prix" required>
                     </div>
                 </div>
-                <div class="col-lg-3 mt-4">
+
+                <div class="col-lg-5 mt-4">
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="bi bi-arrow-down-circle-fill" style="font-size: 2rem"></i>
                     </button>

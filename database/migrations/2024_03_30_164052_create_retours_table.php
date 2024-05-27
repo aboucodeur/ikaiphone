@@ -14,15 +14,15 @@ return new class extends Migration
         Schema::create('retours', function (Blueprint $table) {
             $table->id('re_id');
             $table->date('re_date')->default('now()');
-            $table->string('re_motif')->nullable(); // motif du retour
-            $table->smallInteger('etat')->default(0); // pour securiser le retour
+            $table->string('re_motif')->nullable();
+            $table->smallInteger('etat')->default(0);
             $table->timestamps();
-            // cle etrangere
-            $table->unsignedBigInteger('i_id'); // la dite iphone retourner
-            $table->unsignedBigInteger('i_ech_id'); // contre une nouvelle iphone
+            $table->unsignedBigInteger('i_id');
+            $table->unsignedBigInteger('i_ech_id');
+            $table->unsignedBigInteger('en_id');
+            $table->foreign('en_id')->references('en_id')->on('entreprises')->cascadeOnUpdate();
             $table->foreign('i_id')->references('i_id')->on('iphones')->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreign('i_ech_id')->references('i_id')->on('iphones')->cascadeOnUpdate()->cascadeOnDelete();
-            // suppression en douce
             $table->softDeletes();
         });
     }

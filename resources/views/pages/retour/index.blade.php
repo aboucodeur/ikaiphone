@@ -2,11 +2,12 @@
     <div class="row">
         <div class="col-lg-12 mb-5">
             <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">RETOURS</h4>
-                    {{-- Bouton pour ajouter un nouveau retour --}}
-                    <a href="{{ route('retour.create') }}" class="btn btn-primary btn-sm">
-                        Ajouter un retour &nbsp;<i class="bi bi-plus-circle-fill"></i></a>
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center g-2">
+                        <h4 class="mb-0">RETOURS</h4>
+                        {{ \App\Helpers\ModalHelper::trigger('addRet', '<i class="bi bi-plus-circle-fill"></i></a> Ajouter un retour', '') }}
+                    </div>
+
                 </div>
                 <div class="card-body">
                     <div class="table-card">
@@ -41,14 +42,16 @@
                                                         <i data-feather="check"></i>
                                                     </button>
                                                 </form>
-                                                {{-- Formulaire de suppression --}}
-                                                <form method="POST" action="{{ route('retour.destroy', $retour) }}">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm">
-                                                        <i class="text-danger" data-feather="trash"></i>
-                                                    </button>
-                                                </form>
+
+                                                {{ \App\Helpers\ModalHelper::action(
+                                                    'delRet',
+                                                    '<i class="text-danger" data-feather="trash"></i>',
+                                                    [
+                                                        'route' => route('retour.destroy', $retour),
+                                                        'datas' => json_encode($retour),
+                                                    ],
+                                                    '',
+                                                ) }}
                                             @else
                                                 <span class="text-success">Valider</span>
                                             @endif
@@ -63,4 +66,87 @@
             </div>
         </div>
     </div>
+
+    <!-- MODALS -->
+    @extends('includes.modal', [
+        'id' => 'addRet',
+        'fid' => 'faddRet',
+        'title' => 'Effectuer un retour',
+        'fmethod' => 'POST',
+        'faction' => route('retour.store'),
+        'b2Type' => 'submit',
+    ])
+    @section('content_addRet')
+        @include('pages.retour.create', ['datas_iphones' => $datas_iphones])
+    @endsection
+
+    @extends('includes.modal', [
+        'id' => 'delRet',
+        'fid' => 'fdelRet',
+        'title' => 'Suppression retour',
+        'fmethod' => 'DELETE',
+    ])
+    @section('content_delRet')
+        <p id="content_message_delRet"></p>
+    @endsection
+    @section('footer_delRet')
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">FERMER</button>
+        <button type="submit" class="btn btn-danger">OUI</button>
+    @endsection
+
 </x-default>
+
+<script>
+    $(function() {
+        // Scanne des retours d'iphones
+        // const retour_datas = $("#datas_iphones").data("datas_iphones");
+        // if (Array.isArray(retour_datas)) {
+        //     var validInput = $("#barcode");
+        //     var validBtn = $("#valid_retour_btn");
+        //     var submitBtn = $("#retour_submit_btn");
+        //     submitBtn.hide();
+
+        //     validBtn.click(function(e) {
+        //         e.preventDefault();
+        //         const find = retour_datas.find(
+        //             (d) => d.barcode == validInput.val()
+        //         );
+        //         if (find) {
+        //             validBtn.hide();
+        //             submitBtn.show();
+        //             $("#info_retour").html(`
+        //             <p class="m-0">Nom du modele : ${find.modele}</p>
+        //             <p class="m-0">Type : ${find.type}</p>
+        //             <p class="m-0">Memoire : ${find.memoire}</p>
+        //             <p class="m-0">Client : ${find.client}</p>
+        //             <p class="m-0">Date : ${new Date(
+        //                 find.date_vente
+        //             ).toLocaleString()}</p>
+        //         `);
+        //         }
+        //     });
+        // }
+
+        // Ajouter un retour
+        $("#addRetBtn").click(function(e) {
+            var form = $("#faddRet");
+            setTimeout(() => {
+                form.find("#barcode").focus()
+            }, 1000);
+        });
+
+        // Suppression retour
+        $('.delRetBtn').click(function(e) {
+            var datas = $(this).data('datas');
+            var route = $(this).data('route');
+            var form = $('#fdelRet');
+            form.attr('action', route);
+            form.find("#content_message_delRet").html(`
+                <p>
+                    Etes-vous sure de supprimer le retour ?
+                </p>
+            `)
+        });
+
+    });
+</script>

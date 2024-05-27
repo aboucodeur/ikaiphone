@@ -17,9 +17,7 @@ class UserTypeMiddleware
     public function handle(Request $request, Closure $next, ...$types): Response
     {
         $user = Auth::user();
-
-        // Vérifiez si le type d'utilisateur est autorisé
-        if ($user && in_array($user->u_type, $types)) {
+        if ($user->u_type && in_array($user->u_type, $types)) {
             return $next($request);
         }
 

@@ -20,11 +20,16 @@ class Modele extends Model
         'm_memoire',
         'm_qte',
         'm_prix',
-        'm_couleur'
+        'en_id'
     ];
 
     public function iphones(): HasMany
     {
         return $this->hasMany(Iphone::class, 'm_id');
+    }
+
+    public function entreprise()
+    {
+        return $this->belongsTo(Entreprise::class, 'en_id');
     }
 }

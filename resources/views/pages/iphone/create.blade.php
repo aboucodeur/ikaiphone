@@ -16,7 +16,7 @@
                     <option value="">Sélectionner un modèle</option>
                     @foreach ($modeles as $modele)
                         <option value="{{ $modele->m_id }}">{{ $modele->m_nom }} {{ $modele->m_type }} ~
-                            {{ $modele->m_memoire }} GO ~ {{ $modele->m_couleur }}</option>
+                            {{ $modele->m_memoire }} GO</option>
                     @endforeach
                 </select>
             </div>

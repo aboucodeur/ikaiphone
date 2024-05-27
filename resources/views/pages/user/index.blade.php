@@ -3,10 +3,10 @@
         <div class="col-lg-12 mb-5">
             <div class="card h-100 opacity-80">
                 <div class="card-header">
-                    <h4>Utilisateurs</h4>
-                    <a href="{{ route('user.create') }}" class="btn btn-sm btn-primary">
-                        <i class="bi bi-plus-circle-fill"></i> NOUVEAUX UTILISATEUR
-                    </a>
+                    <div class="d-flex justify-content-between align-items-center g-2">
+                        <h4>Utilisateurs</h4>
+                        {{ \App\Helpers\ModalHelper::trigger('addUser', '<i class="bi bi-plus-circle-fill"></i> ADD USER', '') }}
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="table-card">
@@ -40,4 +40,17 @@
             </div>
         </div>
     </div>
+
+    @extends('includes.modal', [
+        'id' => 'addUser',
+        'title' => 'Nouveaux User',
+        'fid' => 'faddUser',
+        'fmethod' => 'POST',
+        'faction' => route('user.store'),
+        'b2Type' => 'submit',
+    ])
+    @section('content_addUser')
+        @include('pages.user.create')
+    @endsection
+    
 </x-default>

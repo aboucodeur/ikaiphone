@@ -14,7 +14,6 @@ CREATE TABLE Users(
 CREATE TABLE Modeles(
    m_id SERIAL PRIMARY KEY,
    m_nom VARCHAR(60) NOT NULL,
-   m_couleur VARCHAR(100) NOT NULL,
    m_type VARCHAR(25) NOT NULL,
    m_memoire INT NOT NULL,
    m_qte DECIMAL(15,2),

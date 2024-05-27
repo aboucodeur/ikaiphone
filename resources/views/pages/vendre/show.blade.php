@@ -19,7 +19,6 @@
                     <strong style="text-transform: uppercase" class="text-primary">
                         {{ $iphone->modele->m_nom }}
                         {{ $iphone->modele->m_type }} /
-                        {{ $iphone->modele->m_couleur }} /
                         {{ $iphone->modele->m_memoire }} (GO)
                         {{ $iphone->i_barcode }}
                     </strong>

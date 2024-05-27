@@ -1,4 +1,4 @@
-@extends('includes.wrapper.panier')
+@extends('includes.wrapper.panier', ['run_script' => '1'])
 
 @section('fpanier')
     @if ($achat->a_etat < 1)
@@ -11,12 +11,19 @@
         @foreach ($paniers as $iphone)
             <tr>
                 <td class="w-30">
-                    {{ $iphone->modele->m_nom }}
-                    {{ $iphone->modele->m_type }}
-                    {{ $iphone->modele->m_memoire }} (GO)
-                    ~ {{ $iphone->i_barcode }}
+                    <strong>
+                        {{ $iphone->i_barcode }}
+                    </strong>
+                    /
+                    {{ $iphone->modele->m_nom . ' ' . $iphone->modele->m_type . ' ' . $iphone->modele->m_memoire . ' (GO)' }}
                 </td>
-                <td class="w-5">{{ $achat->a_etat }}</td>
+                <td class="w-5">
+                    @if ($achat->a_etat < 1)
+                        <span>En cours</span>
+                    @else
+                        <img src="/assets/images/svg/check.svg" />
+                    @endif
+                </td>
                 <td>
                     {{ number_format($iphone->pivot->ac_prix, 0, '', ' ') }}
                     <sub>F</sub>

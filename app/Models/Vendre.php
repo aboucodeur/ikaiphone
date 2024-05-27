@@ -36,6 +36,7 @@ class Vendre extends Model
     {
         return $this->belongsToMany(Iphone::class, 'vcommandes', 'v_id', 'i_id')
             ->withPivot('vc_id', 'vc_etat', 'vc_qte', 'vc_prix', 'created_at', 'updated_at');
+        // ->withPivot('vc_id', 'vc_etat', 'vc_qte', 'vc_prix', 'vc_color', 'created_at', 'updated_at');
     }
 
     public function vreductions()

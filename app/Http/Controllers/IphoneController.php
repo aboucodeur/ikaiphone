@@ -8,17 +8,17 @@ use Illuminate\Http\Request;
 
 class IphoneController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Pas de systeme de corbeille
-        $iphones = Iphone::all();
+        $is_soft = $request->get('f') == "soft";
+        $iphones = Iphone::query()->latest('created_at')->get();
+        if ($is_soft) $iphones = Iphone::onlyTrashed()->latest('created_at')->get();
         $modeles = Modele::query()->latest('created_at')->get();
         return view('pages.iphone.index', compact('iphones', 'modeles'));
     }
 
     public function create()
     {
-        // sans prendre les modele supprimer
         $modeles = Modele::query()->latest('created_at')->get();
         return view('pages.iphone.create', compact('modeles'));
     }

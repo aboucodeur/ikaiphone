@@ -14,12 +14,15 @@ return new class extends Migration
         Schema::create('clients', function (Blueprint $table) {
             $table->id('c_id');
             $table->string('c_nom', 100);
-            $table->string('c_tel', 25);
-            $table->string('c_adr', 200);
-            // simple ou revendeur
+            $table->string('c_tel', 25)->nullable();
+            $table->string('c_adr', 200)->nullable();
             $table->string('c_type', 10);
-            $table->timestamps(); // [created|updated]_at
-            // suppression en douce
+
+            // Provient de quel entreprise
+            $table->unsignedBigInteger('en_id');
+            $table->foreign('en_id')->references('en_id')->on('entreprises')->cascadeOnUpdate();
+
+            $table->timestamps();
             $table->softDeletes();
         });
     }

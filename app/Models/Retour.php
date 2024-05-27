@@ -19,6 +19,7 @@ class Retour extends Model
         'etat',
         'i_id',
         'i_ech_id',
+        'en_id'
     ];
 
     protected $dates = [
@@ -33,5 +34,10 @@ class Retour extends Model
     public function iphoneEchange()
     {
         return $this->belongsTo(Iphone::class, 'i_ech_id', 'i_id');
+    }
+
+    public function entreprise()
+    {
+        return $this->belongsTo(Entreprise::class, 'en_id');
     }
 }

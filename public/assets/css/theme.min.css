@@ -10949,6 +10949,14 @@ fieldset:disabled .btn {
     --dashui-bg-opacity: 1;
     background-color: rgba(30, 41, 59, 0.3) !important;
 }
+
+/* my custom menu */
+.menu-bg {
+    --dashui-bg-opacity: 1;
+    background-color: white !important;
+    color: blue !important;
+}
+
 .bg-transparent {
     --dashui-bg-opacity: 1;
     background-color: transparent !important;

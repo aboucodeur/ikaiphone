@@ -4,23 +4,37 @@ namespace App\Http\Controllers;
 
 use App\Models\Iphone;
 use App\Models\Retour;
-use App\Models\Vendre;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * C'est la partie la plus deliquat de l'application !
+ * C'est quoi meme un retour ?
+ *  Apres que un client a achete un iphone il voit des defauts la dessus
+ *  il se rend a la boutique et l'on echange contre une nouvelle iphone .
+ *
+ *  Voici ses consequences sur le stock de l'entreprise
+ *  -> L'ancien iphone est donne aux fournisseurs
+ *  -> Le nouveaux iphone est considere comme vendu
+ *  Donc -2 du stock de l'iphone
+ *  -> Les commandes de l'ancien iphone sont supprimer
+ *  -> Ainsi que les paiements
+ *
+ *
+ */
 class RetourController extends Controller
 {
     public function index()
     {
-        $retours = Retour::query()->latest('created_at')->get();
-        return view('pages.retour.index', compact('retours'));
-    }
-
-    public function create()
-    {
-        // contient les informations de chaque iphones pour faire de la recherche cote client !
+        $en_id = auth()->user()->en_id;
         $datas_iphones = [];
-        $iphones = Iphone::withCount('ventes')->get()->where('ventes_count', '>', 0);
+
+        // filtrer par entreprise en joingant modele en verifant en_id
+        $iphones = Iphone::with(['modele', 'ventes'])->whereHas('modele', function ($query) use ($en_id) {
+            $query->where('en_id', '=', $en_id);
+        })->get();
+
         foreach ($iphones as $key => $iphone) {
             /**
              * La relation entre l'iphones et vendres est (n,n) -> vcommandes
@@ -38,12 +52,15 @@ class RetourController extends Controller
                 'date_vente' => $vendre->pivot->created_at,
             ];
         }
-
-        return view('pages.retour.create', compact('datas_iphones'));
+        $retours = Retour::query()->latest('created_at')->get();
+        return view('pages.retour.index', compact('retours', 'datas_iphones'));
     }
 
+    // ! fix : Ajouter un retour d'iphone
     public function store(Request $request)
     {
+        $en_id = auth()->user()->en_id;
+
         $datas = $request->validate([
             're_date' => 'required',
             're_motif' => 'nullable|string',
@@ -51,38 +68,54 @@ class RetourController extends Controller
             'i_ech_id' => 'required',
         ]);
 
-        $find_iphone = Iphone::query()->where('i_barcode', '=', $datas['barcode'])->first();
-        $iphone = Retour::withTrashed()->find($find_iphone->i_id); // 1 Verifier si retour
-        $donnees = Iphone::with('ventes')->find($find_iphone->i_id); // 2 Verifier si commande
-        $is_not_same = $datas['barcode'] !== $datas['i_ech_id']; // 3 Verifier si pas le meme iphonw
+        // filtre par en en_id en joingant par modele en verifant modele.en_id
+        $find_iphone = Iphone::with('modele')->where('i_barcode', '=', $datas['barcode'])->whereHas('modele', function ($query) use ($en_id) {
+            $query->where('en_id', '=', $en_id);
+        })->first();
 
-        // arrivage
-        $ids = Iphone::withCount('retour')->get()->where('retour_count', '>', 0)->pluck('i_id');
-        $arrivages = Iphone::with(['modele'])->withCount('ventes')->get()->where('ventes_count', '<', 1)->where('modele.m_qte', '>', 0);
-        if (count($ids) > 0) $arrivages->whereNotIn('iphones.i_id', ...$ids);
+        $donnees = Iphone::with('ventes')->find($find_iphone->i_id);
+        $is_not_same = $datas['barcode'] !== $datas['i_ech_id'];
+
+
+        // echanger contre une nouvelle arrivage d'iphone
+        $ids = Iphone::whereHas('retours')->pluck('i_id');
+        $arrivages = Iphone::with(['modele'])
+            ->whereHas('ventes', function ($query) {
+                $query->havingRaw('COUNT(*) < 1');
+            })
+            ->where('modele.m_qte', '>', 0)
+            ->whereNotIn('i_id', $ids)
+            ->get();
         $ech_iphone = $arrivages->where('i_barcode', '=', $datas['i_ech_id'])->first();
-
-        if (!isset($iphone) && $donnees->ventes[0]->pivot && $is_not_same) Retour::create([
+        if ($donnees->ventes[0]->pivot && $is_not_same && isset($ech_iphone->i_id)) Retour::create([
             're_date' => $datas['re_date'],
             're_motif' => $datas['re_motif'],
             'i_id' => $find_iphone->i_id,
             'i_ech_id' => $ech_iphone->i_id,
+            'en_id' => $en_id
         ]);
         return redirect()->route('retour.index');
     }
 
+    // TODO : Valider le retour d'iphone
     public function validRetour(Retour $retour)
     {
+        $en_id = auth()->user()->en_id;
+        if ($retour->en_id !== $en_id) abort(403, 'Vous n\'êtes pas autorisé à faire ça !');
+
+        // enlever -1 du stock de l'iphone (modele)
         $retour->update(['etat' => 1]);
         $retour->iphoneEchange->modele->update([
-            'm_qte' => DB::raw('m_qte - 1') // mettre a jour la quantite du modele
+            'm_qte' => DB::raw('m_qte - 1')
         ]);
+
+        $retour->iphoneRetourne->paiements()->delete();
+        $retour->iphoneRetourne->ventes()->detach();
         return redirect()->route('retour.index');
     }
 
     public function destroy(Retour $retour)
     {
-        // forcer la suppression
         $retour->forceDelete();
         return redirect()->route('retour.index');
     }

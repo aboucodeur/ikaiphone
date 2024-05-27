@@ -1,34 +1,35 @@
-<x-default
-    dstyle="background: url('/achats.jpg');background-repeat: no-repeat;background-attachment: fixed;background-position: center;">
+<x-default>
     <div class="row">
+        <div class="col-lg-12">
+            <form method="POST" action="{{ route('achat.store') }}">
+                @csrf
+                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="mb-3">
+                            <input autofocus type="date" class="form-control" name="a_date" id="a_date"
+                                value="{{ old('a_date', date('Y-m-d')) }}" required />
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            <select class="form-select" id="f_id" name="f_id" required>
+                                <option value="">Sélectionner un fournisseur</option>
+                                @foreach ($frs as $fr)
+                                    <option value="{{ $fr->f_id }}">{{ $fr->f_nom }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <button type="submit" class="btn btn-success w-100">Ajouter</button>
+                    </div>
+                </div>
+            </form>
+        </div>
         <div class="col-lg-12 mb-5">
             <div class="card h-100 opacity-80">
                 <div class="card-header">
                     <h4>Achats (arrivages)</h4>
-                    <form method="POST" action="{{ route('achat.store') }}">
-                        @csrf
-                        <div class="row">
-                            <div class="col-lg-3">
-                                <div class="mb-3">
-                                    <input autofocus type="date" class="form-control" name="a_date" id="a_date"
-                                        value="{{ old('a_date', date('Y-m-d')) }}" required />
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <select class="form-select" id="f_id" name="f_id" required>
-                                        <option value="">Sélectionner un fournisseur</option>
-                                        @foreach ($frs as $fr)
-                                            <option value="{{ $fr->f_id }}">{{ $fr->f_nom }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-lg-3">
-                                <button type="submit" class="btn btn-secondary w-100">Valider</button>
-                            </div>
-                        </div>
-                    </form>
                 </div>
                 <div class="card-body">
                     <div class="table-card">
@@ -54,7 +55,7 @@
                                     <tr>
                                         <td scope="row" class="t_num">{{ $idx + 1 }}</td>
                                         <td>{{ explode(' ', $achat->a_date)[0] }}</td>
-                                        <td>{{ $achat->fournisseur->f_nom }}</td>
+                                        <td>{{ $achat->fournisseur?->f_nom }}</td>
                                         <td>{{ number_format($mte, 0, '', ' ') }} <sub>F</sub></td>
                                         <td class="d-flex w-100 align-items-center gap-1 flex-wrap">
                                             <a class="btn btn-sm btn-primary m-1"

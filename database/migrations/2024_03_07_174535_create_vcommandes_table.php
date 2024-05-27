@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('vc_etat');
             $table->decimal('vc_qte', 15, 2);
             $table->decimal('vc_prix', 15, 2);
+            // $table->string('vc_color'); // couleur de l'iphone lors de la ventes
             // Clés étrangères
             $table->foreign('i_id')->references('i_id')->on('iphones');
             $table->foreign('v_id')->references('v_id')->on('vendres');

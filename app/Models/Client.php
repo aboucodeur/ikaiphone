@@ -18,10 +18,16 @@ class Client extends Model
         'c_tel',
         'c_adr',
         'c_type',
+        'en_id'
     ];
 
     public function vendres()
     {
         return $this->hasMany(Vendre::class, 'c_id');
+    }
+
+    public function entreprise()
+    {
+        return $this->belongsTo(Entreprise::class, 'en_id');
     }
 }

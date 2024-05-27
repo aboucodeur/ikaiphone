@@ -35,7 +35,8 @@ class VendreHelper
 
     public static function paiementVendre(Vendre $vendre)
     {
-        $paniers = $vendre->iphones()->get();
+        // ()->get()
+        $paniers = $vendre->iphones;
 
         $montant = 0;
         $payer = 0;
@@ -43,7 +44,6 @@ class VendreHelper
 
         foreach ($paniers as $iph) {
             $montant += $iph->pivot->vc_prix;
-            // ! bugs corriger : juste probleme de logique
             foreach ($iph->paiements()->where('v_id', '=', $iph->pivot->v_id)->get() as $paiement) {
                 $payer += $paiement->vp_montant;
             }
@@ -61,13 +61,14 @@ class VendreHelper
     {
         if (isset($vendre) && isset($iphone)) {
             $vtype = $vendre->v_type;
+            $infos_vente = self::paiementVendre($vendre);
             $etat = $iphone->pivot->vc_etat; // ici c'est la commande pivot table
             /**
              * Si simple : 0 ou 1
              * Si revendeur : 0 ou 1 ou 2 ou 3
              */
             if ($vtype === 'SIM') return ($etat < 1 ? 'En cours' : 'Valider');
-            if ($vtype === 'REV') return ($etat == 0 ? 'En cours' : ($etat == 1 ? 'Valider' : ($etat == 2 ? 'Vendu' : 'Rendu')));
+            if ($vtype === 'REV') return ($etat == 0 ? 'En cours' : ($etat == 1 ? 'Valider' : (($etat == 2 || $infos_vente['reste'] == 0) ? 'Vendu' : 'Rendu')));
         }
     }
 

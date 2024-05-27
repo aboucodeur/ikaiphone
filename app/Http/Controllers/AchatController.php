@@ -12,11 +12,14 @@ use Illuminate\Support\Facades\DB;
 class AchatController extends Controller
 {
 
+    // ! fix : Affiche les achats de l'entreprise donnee !
     public function index()
     {
-
-        $frs = Fournisseur::withTrashed()->latest('created_at')->get();
-        $achats = Achat::query()->latest('created_at')->get();
+        $en_id = auth()->user()->en_id;
+        $frs = Fournisseur::query()->latest('created_at')->where('en_id', '=', $en_id)->get();
+        $achats = Achat::whereHas('fournisseur', function ($query) use ($en_id) {
+            $query->where('en_id', $en_id);
+        })->latest('created_at')->get();
         return view('pages.achat.index', compact('achats', 'frs'));
     }
 
@@ -36,16 +39,19 @@ class AchatController extends Controller
         return redirect()->route('achat.show', $a);
     }
 
+    // ! fix : Affiche les modeles de l'entreprise donnee !
     public function show(Achat $achat)
     {
+        $en_id = auth()->user()->en_id;
         $paniers = $achat->iphones;
-        $modeles = Modele::withTrashed()->latest('created_at')->get();
+        $modeles = Modele::query()->latest('created_at')->where('en_id', '=', $en_id)->get();
         return view('pages.achat.show', compact('achat', 'modeles', 'paniers'));
     }
 
     public function edit(Achat $achat)
     {
-        $frs = Fournisseur::withTrashed()->latest('created_at')->get();
+        $en_id = auth()->user()->en_id;
+        $frs = Fournisseur::query()->latest('created_at')->where('en_id', '=', $en_id)->get();
         return view('pages.achat.edit', compact('achat', 'frs'));
     }
 
@@ -65,7 +71,6 @@ class AchatController extends Controller
         return redirect()->route('achat.index');
     }
 
-    // ** Fonctionnalites avancee de l'achat ici ! comme la gestion des commandes
     public function addCommande(Request $request, Achat $achat)
     {
         $datas = $request->validate([
@@ -74,18 +79,21 @@ class AchatController extends Controller
             'm_id' => ['required', 'exists:modeles,m_id']
         ]);
 
-        $iphone = Iphone::create([
-            'i_barcode' => $datas['i_barcode'],
-            'm_id' => $datas['m_id']
-        ]);
 
-        $achat->iphones()->attach($iphone['i_id'], [
-            'ac_etat' => 0,
-            'ac_qte' => 1,
-            'ac_prix' => $datas['prix'],
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
+        // ! Improve performance : Add transaction to this operation !
+        DB::transaction(function () use ($datas, $achat) {
+            $iphone = Iphone::create([
+                'i_barcode' => $datas['i_barcode'],
+                'm_id' => $datas['m_id']
+            ]);
+            $achat->iphones()->attach($iphone['i_id'], [
+                'ac_etat' => 0,
+                'ac_qte' => 1,
+                'ac_prix' => $datas['prix'],
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        });
 
         return redirect()->back();
     }
@@ -94,7 +102,8 @@ class AchatController extends Controller
     {
         $i_id = $request->input('i_id');
         $achat->iphones()->detach([$i_id]);
-        Iphone::query()->findOrFail($i_id)->forceDelete(); // suppression forcer de l'arrivage
+        // supprimer l'iphone des arrivages une fois la commande supprimer
+        Iphone::query()->findOrFail($i_id)->forceDelete();
         return redirect()->back();
     }
 

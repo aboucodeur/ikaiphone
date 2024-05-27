@@ -1,125 +1,112 @@
 <x-default>
-    <div class="bg-secondary pt-10 pb-21 mt-n6 mx-n4"></div>
-    <div class="container-fluid mt-n22 ">
-        <div class="row">
-            <div class="col-lg-12 col-md-12 col-12">
-                <div class="d-flex justify-content-between align-items-center mb-0">
-                    <div class="mb-2 mb-lg-0">
-                        <h3 class="mb-0  text-white">Salut, {{ Auth::user()->u_prenom }} {{ Auth::user()->u_nom }}
-                        </h3>
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-12">
+            <!-- Page header -->
+            <div class="d-flex justify-content-between mb-5 align-items-center">
+                <h3 class="mb-0 text-success">STATS</h3>
+                <a href="{{ route('paiement.index') }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-bank"></i> &nbsp;
+                    Paiements
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="row row-cols-1  row-cols-xl-4 row-cols-md-2 ">
+        <div class="col mb-5">
+            <div class="card h-100 card-lift">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted fw-semi-bold ">Stock</span>
+                        <span><i data-feather="truck" class="text-info"></i></span>
+
                     </div>
+                    <div class="mt-4 mb-3 d-flex align-items-center lh-1">
+                        <h3 class="fw-bold  mb-0">{{ $stocks }}</h3>
+                        {{-- <span class="mt-1 ms-2 text-danger "><i data-feather="arrow-down"class="icon-xs"></i>2.29%</span> --}}
+                    </div>
+                    <a href="{{ route('modele.index') }}" class="btn-link fw-semi-bold">Voir le stock</a>
                 </div>
             </div>
         </div>
-        <div class="row">
-            <!-- Stocks -->
-            <div class="col-xl-3 col-lg-6 col-md-12 col-12 mb-5">
-                <div class="card h-100 card-lift">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <h4 class="mb-0">STOCKS</h4>
-                            </div>
-                            <div class="icon-shape icon-lg  text-primary">
-                                <i class="bi bi-phone" style="font-size: 3em"></i>
-                            </div>
-                        </div>
-                        <div class="lh-1">
-                            <h1 class=" mb-1 fw-bold">{{ $stocks }}</h1>
-                        </div>
+        <div class="col mb-5">
+            <div class="card h-100 card-lift">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted fw-semi-bold ">Retours</span>
+                        <span><i data-feather="dollar-sign" class="text-info"></i></span>
                     </div>
-                </div>
-            </div>
-            <!-- Clients -->
-            <div class="col-xl-3 col-lg-6 col-md-12 col-12 mb-5">
-                <div class="card h-100 card-lift">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <h4 class="mb-0">Clients</h4>
-                            </div>
-                            <div class="icon-shape icon-lg  text-primary">
-                                <i class="bi bi-people" style="font-size: 2em"></i>
-                            </div>
-                        </div>
-                        <div class="lh-1">
-                            <h1 class="  mb-1 fw-bold">{{ $clients }}</h1>
-                        </div>
+                    <div class="mt-4 mb-3 d-flex align-items-center lh-1">
+                        <h3 class="fw-bold  mb-0">{{ $rets }}</h3>
+                        {{-- <span class="mt-1 ms-2 text-success "><i data-feather="arrow-up"class="icon-xs"></i>2.29%</span> --}}
                     </div>
-                </div>
-            </div>
-            {{-- Fournisseurs --}}
-            <div class="col-xl-3 col-lg-6 col-md-12 col-12 mb-5">
-                <div class="card h-100 card-lift">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <h4 class="mb-0">Fournisseurs</h4>
-                            </div>
-                            <div class="icon-shape icon-lg  text-primary">
-                                <i class="bi bi-truck" style="font-size: 2em"></i>
-                            </div>
-                        </div>
-                        <div class="lh-1">
-                            <h1 class="  mb-1 fw-bold">{{ $frs }}</h1>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {{-- Nombres de retours --}}
-            <div class="col-xl-3 col-lg-6 col-md-12 col-12 mb-5">
-                <div class="card h-100 card-lift">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <h4 class="mb-0">Retours</h4>
-                            </div>
-                            <div class="icon-shape icon-lg  text-primary">
-                                <i class="bi bi-arrow-down-up" style="font-size: 2em"></i>
-                            </div>
-                        </div>
-                        <div class="lh-1">
-                            <h1 class="  mb-1 fw-bold">{{ $rets }}</h1>
-                        </div>
-                    </div>
+                    <a href="{{ route('retour.index') }}" class="btn-link fw-semi-bold">Voir les retours</a>
                 </div>
             </div>
         </div>
+        <div class="col mb-5">
+            <div class="card h-100 card-lift">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted fw-semi-bold ">Clients</span>
+                        <span><i data-feather="user" class="text-info"></i></span>
 
-
-        <!-- Etat des ventes d'iphones -->
-        <div class="row ">
-            <div class="col-xl-8 col-12 mb-5">
-                <div class="card">
-                    <div class="card-header">
-                        <a class="btn btn-sm btn-primary w-100" href="{{ route('pdfventes') }}" role="button">
-                            <i class="bi bi-printer" style="font-size: 1em;"></i> &nbsp;
-                        </a>
-                        <h4 class="text-center mt-1 mb-1">Etat de paiements des iphones</h4>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive table-card">
-                            <table class="table text-nowrap mb-0 table-centered table-hover">
+                    <div class="mt-4 mb-3 d-flex align-items-center lh-1">
+                        <h3 class="fw-bold  mb-0">{{ $clients }}</h3>
+                        {{-- <span class="mt-1 ms-2 text-success "><i data-feather="arrow-up"class="icon-xs"></i>5.16%</span> --}}
+                    </div>
+                    <a href="{{ route('client.index') }}" class="btn-link fw-semi-bold">Voir Clients</a>
+                </div>
+            </div>
+        </div>
+        <div class="col mb-5">
+            <div class="card h-100 card-lift">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted fw-semi-bold ">Ventes</span>
+                        <span><i data-feather="credit-card" class="text-info"></i></span>
+
+                    </div>
+                    <div class="mt-4 mb-3 d-flex align-items-center lh-1">
+                        <h3 class="fw-bold  mb-0">{{ $ventes }}</h3>
+
+                    </div>
+                    <a href="{{ route('vendre.index') }}" class="btn-link fw-semi-bold">Voir les ventes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Etat de paiements des 3 derniers mois avec les graphes -->
+    <div class="row">
+        <div class="col-lg-6 mb-5">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center g-2">
+                        <h4 class="mb-0 text-center">
+                            Recette du jours {{ date('d/m/Y H:i') }}
+                            <strong>
+                                {{ number_format($somme_recette, 0, '', ' ') }} <sup>F</sup>
+                            </strong>
+                        </h4>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive table-card">
+                        <div class="t-responsive">
+                            <table class="table text-nowrap mb-0 table-centered">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Client</th>
-                                        <th>Modele</th>
-                                        <th>Date paiement</th>
-                                        <th>Montant</th>
-                                        <th>Reste</th>
+                                        <th scope="col">CLIENT</th>
+                                        <th scope="col">PRIX</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($ventes as $v)
+                                    @foreach ($recette_jours as $rj)
                                         <tr>
-                                            <td><strong>{{ Str::upper($v->c_nom) }}</strong></td>
-                                            <td class="text-primary"><strong>{{ Str::upper($v->m_nom) }}</strong></td>
-                                            <td>{{ $v->dernier_paiement }}</td>
-                                            <td><strong>{{ number_format($v->montant, 0, '', ' ') }}</strong>
-                                                <sub>F</sub>
-                                            </td>
-                                            <td><strong>{{ number_format($v->reste, 0, '', ' ') }}</strong>
-                                                <sub>F</sub>
+                                            <td>{{ $rj->client }}</td>
+                                            <td class="text-center">
+                                                {{ number_format($rj->montant_payer, 0, '', ' ') }} <sup>F</sup>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -129,58 +116,351 @@
                     </div>
                 </div>
             </div>
-            {{-- <div class="col-xl-4 col-lg-12 col-md-12 col-12 mb-5 ">
-                <!-- card  -->
-                <div class="card h-100">
-                    <!-- card body  -->
-                    <div class="card-header d-flex align-items-center
-                    justify-content-between">
-                        <div>
-                            <h4 class="mb-0">Tasks Performance </h4>
-                        </div>
+        </div>
 
-                        <!-- dropdown  -->
-                        <div class="dropdown dropstart">
-                            <a class="btn btn-icon btn-ghost btn-sm rounded-circle" href="#!" role="button"
-                                id="dropdownTask" data-bs-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="false">
-                                <i class="icon-xs" data-feather="more-vertical"></i>
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="dropdownTask">
-                                <a class="dropdown-item d-flex align-items-center" href="#!">Action</a>
-                                <a class="dropdown-item d-flex align-items-center" href="#!">Another
-                                    action</a>
-                                <a class="dropdown-item d-flex align-items-center" href="#!">Something else
-                                    here</a>
-                            </div>
-                        </div>
+        <div class="col-lg-6 mb-5">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center g-2">
+                        <h4 class="mb-0">Impayes par client</h4>
                     </div>
-                    <div class="card-body">
-                        <!-- chart  -->
-                        <div class="mb-6">
-                            <div id="perfomanceChart"></div>
-                        </div>
-                        <!-- icon with content  -->
-                        <div class="d-flex align-items-center justify-content-around">
-                            <div class="text-center">
-                                <i class="icon-sm text-success" data-feather="check-circle"></i>
-                                <h1 class="fs-2 mb-0 ">76%</h1>
-                                <p>Completed</p>
-                            </div>
-                            <div class="text-center">
-                                <i class="icon-sm text-warning" data-feather="trending-up"></i>
-                                <h1 class="fs-2 mb-0 ">32%</h1>
-                                <p>In-Progress</p>
-                            </div>
-                            <div class="text-center">
-                                <i class="icon-sm text-danger" data-feather="trending-down"></i>
-                                <h1 class="fs-2 mb-0 ">13%</h1>
-                                <p>Behind</p>
-                            </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive table-card">
+                        <div class="t-responsive">
+                            <table class="table text-nowrap mb-0 table-centered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>CLIENT</th>
+                                        <th>NB. COMMANDE</th>
+                                        <th>Facture</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($clients_commandes as $cc)
+                                        <tr>
+                                            <td>
+                                                <strong class="text-primary">{{ Str::upper($cc->c_nom) }}</strong>
+                                            </td>
+                                            <td>
+                                                A
+                                                <span class="badge badge-success-soft text-success">
+                                                    {{ $cc->nombre_dettes }}
+                                                </span> commande(s) impayée(s)
+                                            </td>
+                                            <td>
+                                                <a target="_blank" class="btn btn-sm btn-primary"
+                                                    href="{{ route('pdf.client.pay', $cc->c_id) }}" role="button">
+                                                    <i class="bi bi-printer"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-            </div> --}}
+            </div>
         </div>
 
+        <div class="col-lg-12 mb-5">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center g-2">
+                        <h4 class="mb-0">Iphones sorties et impayes des 3 derniers mois</h4>
+                        <a target="_blank" class="btn btn-sm btn-primary" href="{{ route('pdf.all.pay') }}"
+                            role="button">Impriner</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive table-card">
+                        <table class="table text-nowrap mb-0 table-centered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>PRODUIT</th>
+                                    <th>CLIENT</th>
+                                    <th>PAYER</th>
+                                    <th>RESTE</th>
+                                    <th>DATE DU DERNIER</th>
+                                    <th>ETAT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($etats_pay_ventes as $ep)
+                                    <tr>
+                                        <td>
+                                            <strong class="text-primary">{{ Str::upper($ep->m_nom) }}</strong>
+                                        </td>
+                                        <td>
+                                            {{ Str::upper($ep->c_nom) }}
+                                        </td>
+                                        <td>
+                                            <strong>{{ number_format($ep->montant, 0, '', ' ') }}</strong>
+                                            <sub>F</sub>
+                                        </td>
+                                        <td>
+                                            <strong>{{ number_format($ep->reste, 0, '', ' ') }}</strong>
+                                            <sub>F</sub>
+                                        </td>
+                                        <td class="text-center">
+                                            {{ $ep->dernier_paiement ?? '-' }}
+                                        </td>
+                                        <td>
+                                            @if ($ep->reste == '0')
+                                                <span class="badge bg-success">Payer</span>
+                                            @else
+                                                <span class="badge bg-danger">Pas Payer</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphes des top 10 modeles -->
+        <div class="col-lg-6 mb-5">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Top 10 des modeles vendus</h4>
+                </div>
+                <div class="card-body">
+                    <div id="chartModeleIphone" data-vi="{{ json_encode($ventes_per_iphones) }}"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphes des top 10 clients -->
+        <div class="col-lg-6 mb-5">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Top 10 des clients</h4>
+                </div>
+                <div class="card-body">
+                    <div id="chartVenteClient" data-vc="{{ json_encode($ventes_per_clients) }}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </x-default>
+
+<script>
+    $(function() {
+        var e;
+
+        // ** GRAPHES
+        const vpiEl = $("#chartModeleIphone");
+        const vpiDatas = vpiEl.data("vi") || [];
+        const max1 = Math.max(...vpiDatas?.map((d) => d.total_ventes));
+        if ($("#chartModeleIphone"))
+            $("#chartModeleIphone").length &&
+            ((e = {
+                    series: [{
+                        name: "Ventes",
+                        type: "line",
+                        data: vpiDatas.map((d) => d.total_ventes),
+                    }, ],
+                    chart: {
+                        height: 300,
+                        type: "line",
+                        stacked: !1,
+                        toolbar: {
+                            show: !1
+                        },
+                    },
+                    legend: {
+                        show: !1
+                    },
+                    grid: {
+                        borderColor: window.theme.gray300
+                    },
+                    fill: {
+                        type: "gradient",
+                        gradient: {
+                            shadeIntensity: 1,
+                            opacityFrom: 0.7,
+                            opacityTo: 0.9,
+                            stops: [0, 90, 100],
+                        },
+                    },
+                    colors: ["#624bff", "#198754"],
+                    stroke: {
+                        width: [2, 2],
+                        curve: "smooth",
+                        colors: ["#624BFF", "#198754"],
+                    },
+                    plotOptions: {
+                        bar: {
+                            columnWidth: "50%"
+                        }
+                    },
+                    labels: vpiDatas.map((d) => d.m_nom),
+                    markers: {
+                        size: 0
+                    },
+                    xaxis: {
+                        min: 1,
+                        labels: {
+                            style: {
+                                fontSize: "11px",
+                                fontWeight: 400,
+                                colors: "#1e293b",
+                                fontFamily: '"Inter", "sans-serif"',
+                            },
+                        },
+                        axisBorder: {
+                            show: !0,
+                            color: window.theme.gray300,
+                            height: 1,
+                            width: "100%",
+                            offsetX: 0,
+                            offsetY: 0,
+                        },
+                        axisTicks: {
+                            show: !0,
+                            borderType: "solid",
+                            color: window.theme.gray300,
+                            height: 6,
+                            offsetX: 0,
+                            offsetY: 0,
+                        },
+                    },
+                    yaxis: {
+                        type: "numeric",
+                        tickAmount: max1, // doit etre la valeur maximun car la boucle genere en fonction
+                        min: 0,
+                        labels: {
+                            formatter: function(val) {
+                                return parseFloat(val);
+                            },
+                            style: {
+                                fontSize: "14px",
+                                fontWeight: 400,
+                                colors: "#1e293b",
+                                fontFamily: '"Inter", "sans-serif"',
+                            },
+                        },
+                    },
+                    tooltip: {
+                        shared: !0,
+                        intersect: !1,
+                        y: {
+                            formatter: function(e) {
+                                return void 0 !== e ? e.toFixed(0) + "" : e;
+                            },
+                        },
+                    },
+                }),
+                new ApexCharts(document.querySelector("#chartModeleIphone"), e).render());
+
+
+
+        const vpcEl = $("#chartVenteClient");
+        const vpcDatas = vpcEl.data("vc") || [];
+        const max2 = Math.max(...vpcDatas?.map((d) => d.nb_ventes));
+        if ($("#chartVenteClient"))
+            $("#chartVenteClient").length &&
+            ((e = {
+                    series: [{
+                        name: "Ventes",
+                        type: "line",
+                        data: vpcDatas.map((d) => d.nb_ventes),
+                    }, ],
+                    chart: {
+                        height: 300,
+                        type: "line",
+                        stacked: !1,
+                        toolbar: {
+                            show: !1
+                        },
+                    },
+                    legend: {
+                        show: !1
+                    },
+                    grid: {
+                        borderColor: window.theme.gray300
+                    },
+                    fill: {
+                        type: "gradient",
+                        gradient: {
+                            shadeIntensity: 1,
+                            opacityFrom: 0.7,
+                            opacityTo: 0.9,
+                            stops: [0, 90, 100],
+                        },
+                    },
+                    colors: ["#624bff", "#198754"],
+                    stroke: {
+                        width: [2, 2],
+                        curve: "smooth",
+                        colors: ["#624BFF", "#198754"],
+                    },
+                    plotOptions: {
+                        bar: {
+                            columnWidth: "50%"
+                        }
+                    },
+                    labels: vpcDatas.map((d) => d.c_nom),
+                    markers: {
+                        size: 0
+                    },
+                    xaxis: {
+                        min: 1,
+                        labels: {
+                            style: {
+                                fontSize: "11px",
+                                fontWeight: 400,
+                                colors: "#1e293b",
+                                fontFamily: '"Inter", "sans-serif"',
+                            },
+                        },
+                        axisBorder: {
+                            show: !0,
+                            color: window.theme.gray300,
+                            height: 1,
+                            width: "100%",
+                            offsetX: 0,
+                            offsetY: 0,
+                        },
+                        axisTicks: {
+                            show: !0,
+                            borderType: "solid",
+                            color: window.theme.gray300,
+                            height: 6,
+                            offsetX: 0,
+                            offsetY: 0,
+                        },
+                    },
+                    yaxis: {
+                        type: "numeric",
+                        tickAmount: max2, // doit etre la valeur maximun car la boucle genere en fonction
+                        min: 0,
+                        labels: {
+                            formatter: function(val) {
+                                return parseFloat(val);
+                            },
+                            style: {
+                                fontSize: "14px",
+                                fontWeight: 400,
+                                colors: "#1e293b",
+                                fontFamily: '"Inter", "sans-serif"',
+                            },
+                        },
+                    },
+                    tooltip: {
+                        shared: !0,
+                        intersect: !1,
+                        y: {
+                            formatter: function(e) {
+                                return void 0 !== e ? e.toFixed(0) + "" : e;
+                            },
+                        },
+                    },
+                }),
+                new ApexCharts(document.querySelector("#chartVenteClient"), e).render());
+    });
+</script>

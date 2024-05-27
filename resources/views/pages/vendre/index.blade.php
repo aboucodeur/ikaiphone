@@ -1,11 +1,14 @@
-<x-default
-    dstyle="background: url('/vendres.jpg');background-repeat: no-repeat;background-attachment: fixed;background-position: center;">
+<x-default>
     <div class="row">
+
+        <div class="col-lg-12">
+            @include('pages.vendre.create')
+        </div>
+
         <div class="col-lg-12 mb-5">
-            <div class="card h-100 opacity-75">
+            <div class="card h-100 shad">
                 <div class="card-header">
                     <h4>VENTES</h4>
-                    @include('pages.vendre.create')
                 </div>
                 <div class="card-body">
                     <div class="table-card">
@@ -34,25 +37,24 @@
                                         <td>{{ number_format($p['reste'], 0, '', ' ') }} <sub>F</sub></td>
                                         <td>{{ $vendre->v_type == 'REV' ? 'REVENDEUR' : 'SIMPLE' }}</td>
                                         <td class="d-flex w-100 align-items-center gap-1 flex-wrap">
-                                            <a class="btn btn-sm btn-primary m-1"
+                                            <a class="btn btn-sm btn-primary m-1 rounded-circle"
                                                 href="{{ route('vendre.show', $vendre) }}" role="button">
-                                                {{-- <i data-feather="eye"></i> --}}
-                                                Details
+                                                <i class="bi bi-eye-fill"></i>
                                             </a>
 
 
                                             {{-- direct remove --}}
                                             @if ($vendre->v_etat < 1)
-                                                <a class="btn-sm btn-primary" href="{{ route('vendre.edit', $vendre) }}"
-                                                    role="button">
-                                                    <i data-feather="edit"></i>
+                                                <a class="btn btn-sm rounded-circle btn-primary"
+                                                    href="{{ route('vendre.edit', $vendre) }}" role="button">
+                                                    <i class="bi bi-pencil"></i>
                                                 </a>
 
                                                 <form method="POST" action="{{ route('vendre.destroy', $vendre) }}">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm">
-                                                        <i class="text-danger" data-feather="trash"></i>
+                                                    <button type="submit" class="btn btn-sm btn-danger rounded-circle">
+                                                        <i class="bi bi-trash"></i>
                                                     </button>
                                                 </form>
                                             @endif

@@ -13,11 +13,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: url('/nav_iphones.jpg');
+            background: url('/apple_iphone.jpg');
             background-size: cover;
             background-position: center;
         }
-
     </style>
 </head>
 

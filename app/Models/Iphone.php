@@ -39,10 +39,13 @@ class Iphone extends Model
             ->withPivot('ac_id', 'ac_etat', 'ac_qte', 'ac_prix');
     }
 
+    // commandes de ventes
     public function ventes()
     {
         return $this->belongsToMany(Vendre::class, 'vcommandes', 'i_id', 'v_id')
             ->withPivot('vc_id', 'vc_etat', 'vc_qte', 'vc_prix', 'created_at', 'updated_at');
+        // ->withPivot('vc_id', 'vc_etat', 'vc_qte', 'vc_prix', 'vc_color', 'created_at', 'updated_at');
+
     }
 
     public function retour()

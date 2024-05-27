@@ -1,16 +1,15 @@
 @props(['title' => 'Mon menu', 'url' => '/'])
 
 @php
+    // Celui du navigateur
     $uri = request()->path();
 
     // nous devons ecarter le /
     if ($url == $uri) {
-        $active_class = 'active bg-primary text-white rounded m-1';
+        $active_class = 'active menu-bg text-white rounded m-1';
     } else {
         $active_class =
-            Str::startsWith('/' . $uri, $url) && Str::length($url) > 1
-                ? 'active bg-primary text-white rounded m-1'
-                : '';
+            Str::startsWith('/' . $uri, $url) && Str::length($url) > 1 ? 'active menu-bg text-white rounded m-1' : '';
     }
 @endphp
 

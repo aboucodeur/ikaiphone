@@ -1,12 +1,14 @@
 <x-invite>
-    <form action="{{ route('login') }}" method="post" class="card smooth-shadow-lg p-6">
+    <form action="{{ route('login') }}" method="post" class="card shadow-lg p-6">
         @csrf
 
-        <div class="content d-flex align-items-center justify-content-center">
-            {{-- <img width="100" src="/logo_ben.jpg" class="img-fluid rounded-top" alt="" /> --}}
-
-            <h2>BEN SERVICES</h2>
-            {{-- <h2>BEN SERVICES</h2> --}}
+        <div class="content d-row text-center align-items-center justify-content-center gap-5 mb-5">
+            {{-- <img width="100" src="/assets/images/ben_services_logo.png" class="img-fluid rounded-top" alt="" /> --}}
+            <h2>IKA IPHONE</h2>
+            <small
+                title="Nous savons que la vente d'iphone n'est pas facile. C'est pour cela avec IKA IPHONE vous allez faire le compte facilement,rapidement et sans mettre votre vie en danger oui"
+                class="text-muted fs-3">Allez a la maison
+                sans probleme !</small>
         </div>
 
         @if ($errors->any())
@@ -15,26 +17,46 @@
             </div>
         @endif
 
-        <div class="text-center mb-5 text-primary fw-bold">
-            <div class="divider-text mt-1">Veuillez renseigner vos informations de connexion !</div>
+        <div>
+            <label for="u_username" class="form-label">Utilisateur (*)</label>
+            <div class="input-group mb-3">
+                <input autofocus type="text" class="form-control @error('u_username') is-invalid @enderror"
+                    name="u_username" id="u_username" placeholder="aboubacar" value="{{ old('u_username') }}"
+                    required />
+                <span class="input-group-text w-10">
+                    <img src="/assets/images/svg/user.svg" alt="User icon">
+                </span>
+            </div>
         </div>
 
-        <div class="mb-3">
-            <label for="u_username" class="form-label">Nom d'utilisateur</label>
-            <input type="text" class="form-control @error('u_username') is-invalid @enderror" name="u_username"
-                id="u_username" placeholder="Ben" value="{{ old('u_username') }}" required />
-        </div>
 
-        <div class="mb-3">
-            <label for="password" class="form-label">Mot de passe</label>
-            <input type="password" class="form-control" name="password" id="password" placeholder="Mot de passe"
-                value="{{ old('password') }}" required />
-        </div>
 
+        <div>
+            <label for="password" class="form-label">Mot de passe (*)</label>
+            <div class="input-group mb-3">
+                <input type="password" class="form-control" name="password" id="password" placeholder="Mot de passe"
+                    value="{{ old('password') }}" required />
+                <span class="input-group-text w-10" id="passIcon">
+                    <img src="/assets/images/svg/eye-password-show.svg" alt="Eye icon">
+                </span>
+            </div>
+        </div>
 
         <button type="submit" class="btn btn-primary">
             Se connecter
         </button>
-
     </form>
 </x-invite>
+
+<script>
+    $(function() {
+        // plus performant encore avec moins de ligne
+        $("#passIcon").click(function() {
+            let type = $("#password").attr("type") === "password" ? "text" : "password";
+            $("#password").attr("type", type);
+            $(this).find('img').attr("src", type === "text" ?
+                "/assets/images/svg/eye-password-hide.svg" :
+                "/assets/images/svg/eye-password-show.svg");
+        });
+    })
+</script>

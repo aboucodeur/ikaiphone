@@ -14,11 +14,9 @@ return new class extends Migration
         Schema::create('iphones', function (Blueprint $table) {
             $table->id('i_id');
             $table->string('i_barcode', 100);
-            // Modification en cascade
             $table->unsignedBigInteger('m_id');
             $table->foreign('m_id')->references('m_id')->on('modeles')->cascadeOnUpdate();
             $table->timestamps();
-            // suppression en douce
             $table->softDeletes();
         });
     }

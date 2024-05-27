@@ -12,22 +12,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // adapter la table aux besoins de l'application
-        /**
-         * Se connecter avec : username et password
-         */
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('u_prenom', 60); // ok
-            $table->string('u_nom', 30); // ok
-            $table->string('u_type', 6); // en cours
-            $table->string('u_username', 80); // en cours
+            $table->string('u_prenom', 60);
+            $table->string('u_nom', 30);
+            $table->string('u_type', 6);
+            $table->string('u_username', 80);
 
-            $table->string('email')->unique(); // laravel
-            $table->string('password'); // laravel
-            $table->timestamp('email_verified_at')->nullable(); // laravel
-            $table->rememberToken(); // laravel
-            $table->timestamps(); // laravel
+            // Provient de quel entreprise
+            $table->unsignedBigInteger('en_id');
+            $table->foreign('en_id')->references('en_id')->on('entreprises')->cascadeOnUpdate();
+
+            $table->string('email')->unique();
+            $table->string('password');
+            $table->timestamp('email_verified_at')->nullable();
+            $table->rememberToken();
+            $table->timestamps();
         });
     }
 
