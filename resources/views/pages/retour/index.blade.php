@@ -29,7 +29,8 @@
                                         <td scope="row" class="t_num">{{ $idx + 1 }}</td>
                                         <td>{{ $retour->re_date }}</td>
                                         <td>{{ $retour->re_motif }}</td>
-                                        <td>{{ $retour->iphoneRetourne->achats->first()->fournisseur->f_nom }}</td>
+                                        <td>{{ $retour->iphoneRetourne?->achats->first()->fournisseur->f_nom ?? 'APPROVISION DIRECTE' }}
+                                        </td>
                                         <td>{{ $retour->iphoneRetourne->i_barcode }}</td>
                                         <td>{{ $retour->iphoneEchange->i_barcode }}</td>
                                         <td class="d-flex align-items-center flex-wrap">
@@ -45,12 +46,12 @@
 
                                                 {{ \App\Helpers\ModalHelper::action(
                                                     'delRet',
-                                                    '<i class="text-danger" data-feather="trash"></i>',
+                                                    '<i style="font-size: 1rem;" class="bi bi-trash"></i>',
                                                     [
                                                         'route' => route('retour.destroy', $retour),
                                                         'datas' => json_encode($retour),
                                                     ],
-                                                    '',
+                                                    'btn-sm btn-danger text-danger rounded-circle',
                                                 ) }}
                                             @else
                                                 <span class="text-success">Valider</span>
@@ -77,7 +78,7 @@
         'b2Type' => 'submit',
     ])
     @section('content_addRet')
-        @include('pages.retour.create', ['datas_iphones' => $datas_iphones])
+        @include('pages.retour.create')
     @endsection
 
     @extends('includes.modal', [
@@ -98,41 +99,12 @@
 
 <script>
     $(function() {
-        // Scanne des retours d'iphones
-        // const retour_datas = $("#datas_iphones").data("datas_iphones");
-        // if (Array.isArray(retour_datas)) {
-        //     var validInput = $("#barcode");
-        //     var validBtn = $("#valid_retour_btn");
-        //     var submitBtn = $("#retour_submit_btn");
-        //     submitBtn.hide();
-
-        //     validBtn.click(function(e) {
-        //         e.preventDefault();
-        //         const find = retour_datas.find(
-        //             (d) => d.barcode == validInput.val()
-        //         );
-        //         if (find) {
-        //             validBtn.hide();
-        //             submitBtn.show();
-        //             $("#info_retour").html(`
-        //             <p class="m-0">Nom du modele : ${find.modele}</p>
-        //             <p class="m-0">Type : ${find.type}</p>
-        //             <p class="m-0">Memoire : ${find.memoire}</p>
-        //             <p class="m-0">Client : ${find.client}</p>
-        //             <p class="m-0">Date : ${new Date(
-        //                 find.date_vente
-        //             ).toLocaleString()}</p>
-        //         `);
-        //         }
-        //     });
-        // }
-
         // Ajouter un retour
         $("#addRetBtn").click(function(e) {
             var form = $("#faddRet");
             setTimeout(() => {
                 form.find("#barcode").focus()
-            }, 1000);
+            }, 700);
         });
 
         // Suppression retour

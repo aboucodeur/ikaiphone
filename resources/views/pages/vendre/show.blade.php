@@ -1,9 +1,8 @@
 @extends('includes.wrapper.panier')
 
 @section('fpanier')
-    {{-- Ne plus afficher le formulaire d'ajout d'iphone une fois la vente valider --}}
     @if ($vendre->v_etat < 1)
-        <x-fpanier route="{{ route('vendre.addCommande', $vendre) }}" :iphones="[...$iphones]" :datasiphones="[...$datas_iphones]" />
+        <x-fpanier route="{{ route('vendre.addCommande', $vendre) }}" :iphones="[...$iphones]" />
     @endif
 @endsection
 

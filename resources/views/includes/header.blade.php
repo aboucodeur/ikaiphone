@@ -1,8 +1,8 @@
 <!-- navbar -->
 <div class="navbar-custom navbar navbar-expand-lg shadow-lg">
     <div class="container-fluid px-0">
-        <a class="navbar-brand d-block align-items-center" href="/">
-            {{-- <img width="40px" src="/assets/images/ben_services_logo.png" alt="ben services logo"> --}}
+        <a class="navbar-brand d-flex gap-1 align-items-center" href="/">
+            <img width="45px" src="/assets/images/favicon/android-chrome-192x192.png" alt="ika iphone logo">
             {{-- <h4>IKA IPHONE</h4> --}}
         </a>
 

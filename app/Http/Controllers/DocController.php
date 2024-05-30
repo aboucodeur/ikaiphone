@@ -74,8 +74,8 @@ class DocController extends Controller
                 'i.i_barcode',
                 'v.v_id',
                 'vc.vc_prix AS montant_total',
-                DB::raw('montant AS montant_paye'),
-                DB::raw('vc.vc_prix - montant AS montant_restant')
+                DB::raw('COALESCE(montant,0) AS montant_paye'),
+                DB::raw('vc.vc_prix - COALESCE(montant,0) AS montant_restant')
             )
             ->join('vendres AS v', 'c.c_id', '=', 'v.c_id')
             ->join('vcommandes AS vc', 'v.v_id', '=', 'vc.v_id')
@@ -88,12 +88,8 @@ class DocController extends Controller
             ->get();
 
         // dd($paiements);
-
         if ($paiements->count() < 1) return "Pas de donnees necessaires pour imprimer le paiement !";
-
         $fact_id = $paiements[0]->v_id;
-
-
         $pdf = new Dompdf();
         $options = new Options();
         $options->set('chroot', [

@@ -8,8 +8,8 @@
             </div>
         </div>
         <div class="col-lg-3">
-            <div class="mb-3">
-                <select class="form-select" id="c_id" name="c_id" required>
+            <div class="input-group mb-3">
+                <select autofocus class="form-select" id="c_id" name="c_id" required>
                     <option value="">Sélectionner un client</option>
                     @foreach ($clients as $client)
                         <option value="{{ $client->c_id }}">{{ Str::upper($client->c_nom) }} ~
@@ -17,6 +17,9 @@
                         </option>
                     @endforeach
                 </select>
+                <span class="input-group-text">
+                    <img src="/assets/images/svg/user.svg" alt="Client financier icon">
+                </span>
             </div>
         </div>
         <div class="col-lg-3">

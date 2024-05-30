@@ -14,7 +14,7 @@
                         <div class="mb-3">
                             <label for="v_date" class="form-label">Date</label>
                             <input type="date" class="form-control" name="v_date" id="v_date"
-                                value="{{ old('v_date', date('d/m/Y')) }}" required />
+                                value="{{ old('v_date', date('Y-m-d')) }}" required />
                         </div>
 
                         <div class="mb-3">

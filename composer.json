@@ -1,7 +1,7 @@
 {
-    "name": "laravel/laravel",
+    "name": "IKAIPHONE",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Une application qui facilite la gestion des ventes d'iphones",
     "keywords": [
         "laravel",
         "framework"

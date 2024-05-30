@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\VendreHelper;
 use App\Models\Client;
 use App\Models\Iphone;
+use App\Models\Retour;
 use App\Models\Vendre;
 use App\Models\Vpaiement;
 use Illuminate\Http\Request;
@@ -12,7 +13,6 @@ use Illuminate\Support\Facades\DB;
 
 class VendreController extends Controller
 {
-    // ! fix : Affiche les ventes de l'entreprise donnee !
     public function index()
     {
         $en_id = auth()->user()->en_id;
@@ -20,14 +20,11 @@ class VendreController extends Controller
         $vendres = Vendre::with(['client'])->whereHas('client', function ($query) use ($en_id) {
             $query->where('en_id', '=', $en_id);
         })->get();
-
         return view('pages.vendre.index', compact('vendres', 'clients'));
     }
 
-    // ! fix : Affiche les clients de l'entreprise donnee !
     public function create()
     {
-        // $clients = Client::withTrashed()->latest('created_at')->orderBy('c_type')->get();
         $en_id = auth()->user()->en_id;
         $clients = Client::query()->latest('created_at')->where('en_id', '=', $en_id)->orderBy('c_type')->get();
         return view('pages.vendre.create', compact('clients'));
@@ -51,7 +48,6 @@ class VendreController extends Controller
         return redirect()->route('vendre.show', $v);
     }
 
-    // ! fix : Affiche les clients de l'entreprise donnee !
     public function edit(Vendre $vendre)
     {
         $en_id = auth()->user()->en_id;
@@ -80,7 +76,6 @@ class VendreController extends Controller
     {
         $en_id = auth()->user()->en_id;
         $paniers = $vendre?->iphones;
-        $datas_iphones = [];
 
         $ids = $vendre->iphones()->pluck('iphones.i_id');
         $vids = Iphone::whereHas('modele', function ($query) use ($en_id) {
@@ -95,23 +90,60 @@ class VendreController extends Controller
             $query->where('en_id', $en_id);
         })->latest('created_at')->whereNotIn('iphones.i_id', [...$dont_show])->get(); // iphones disponibles
 
+        return view('pages.vendre.show', compact('vendre', 'iphones', 'paniers'));
+    }
 
-        foreach ($iphones as $key => $iphone) {
-            if ($iphone->modele) {
-                $datas_iphones[] = [
-                    'id' => $iphone->i_id,
-                    'barcode' => $iphone->i_barcode,
-                    'modele' => $iphone->modele->m_nom,
-                    'type' => $iphone->modele->m_type,
-                    'memoire' => $iphone->modele->m_memoire,
-                    'qte' => $iphone->modele->m_qte,
-                    'prix' => $iphone->modele->m_prix,
-                ];
-            }
+    // TODO : Verification de l'iphone lors de la vente
+    public function checkIphone(Request $request)
+    {
+        $en_id = auth()->user()->en_id;
+        $iphone = Iphone::whereHas('modele', function ($query) use ($en_id) {
+            $query->where('en_id', $en_id);
+        })->where('i_barcode', '=', $request->vbarcode)->first();
+
+        $retour = $iphone?->retour;
+        $ventes = $iphone?->ventes;
+
+        $html = "
+            <p class='m-0'>" . $iphone->modele->m_nom . " " . $iphone->modele->m_type . "(" . $iphone->modele->m_memoire . ") GO</p>
+            <p class='m-0'>En stock : " . (int)$iphone->modele->m_qte . "</p>
+            <p class='m-0'>Prix base : " . number_format($iphone->modele->m_prix, 0, '.', ' ') . " F</p>
+        ";
+
+        // si retourner pour : i_id
+        if ($retour) {
+            $html = '<p class="text-danger mt-3">Iphone Deja retourner</p>';
+            return response($html, 200)->header('Content-Type', 'text/html');
         }
 
-        return view('pages.vendre.show', compact('vendre', 'iphones', 'paniers', 'datas_iphones'));
+        // si retour pour i_ech_id
+        $has_retour = Retour::query()->where('i_ech_id', '=', $iphone?->i_id)->where('en_id', '=', $en_id)->first();
+        if ($has_retour) $html = '<p class="text-danger mt-3">Cet iphone a remplacer une autres</p>';
+
+        // si vendu
+        if ($ventes?->count() > 0) {
+            $etat_commande = $ventes[0]->pivot->vc_etat;
+            if ($etat_commande > 0) $html = '<p class="text-danger mt-3">Iphone Deja vendu</p>';
+            else {
+                $html = '
+                <form class="mt-3" method="POST" action="' . route('vendre.remCommande', $ventes[0]->pivot->v_id) . '">
+                ' . csrf_field() . '
+                <input type="hidden" name="_method" value="DELETE">
+                <input type="hidden" name="i_id" value="' . $iphone->i_id . '">
+                <button type="submit" class="btn btn-sm btn-primary">
+                    <img src="/assets/images/svg/refresh-ccw.svg" alt="refresh">
+                    Annuler la commande !
+                </button>
+            </form>
+                ';
+            }
+            return response($html, 200)->header('Content-Type', 'text/html');
+        }
+
+        return response($html, 200)->header('Content-Type', 'text/html');
     }
+
+    /** COMMANDES */
 
     // ! fix : AJOUTER UNE COMMANDE DE VENTE A LA VENTE !
     public function addCommande(Request $request, Vendre $vendre)
@@ -152,11 +184,12 @@ class VendreController extends Controller
         if ($vendre->v_etat < 1) {
             // SIM & REV
             $vendre->update(['v_etat' => 1]);
-            $iphones = $vendre->iphones;
-            foreach ($iphones as $iphone) {
-                $iphone->pivot->update(['vc_etat' => 1]);
-                // SIM : Update the modele stock m_qte -1
-                if ($is_simple) $iphone->modele->update(['m_qte' => DB::raw('m_qte - 1')]);
+            foreach ($vendre->iphones as $iphone) {
+                // Transaction pour la mise a jour
+                DB::transaction(function () use ($iphone, $is_simple) {
+                    $iphone->pivot->update(['vc_etat' => 1]);
+                    if ($is_simple) $iphone->modele->update(['m_qte' => DB::raw('m_qte - 1')]);
+                });
             }
             return redirect()->back();
         }
@@ -201,7 +234,7 @@ class VendreController extends Controller
         }
     }
 
-    /** PAIEMENT */
+    /** PAIEMENTS */
     public function paiementPage(Vendre $vendre, Iphone $iphone)
     {
         $commandes = $vendre->iphones;

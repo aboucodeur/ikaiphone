@@ -26,16 +26,34 @@ La table principale de l'application : Entreprise
   - [*] Modification du header
   - [*] Ajout de nouveaux utilisateurs via un modal
 
-
 - [*] Afficher les ventes et achats de l'entreprise
       Faire une transaction lors de l'ajout des commandes ventes et achats
 - [*] Scanne de l'iphone lors de la vente (Revoir le message !)
 - [*] Adapter le retour a l'architecture multi-utilisateur (la partie ou j'ai pas bien coder)
+- [*] Corriger le probleme au niveaux de la facture impayer par clients
 
+- [*] Simplifier l'ajout d'iphone avec insertion grouper simple et facile (ameliore bien l'application)
+        Cela veut dire lors de l'ajout d'un modele
+        on peut chosir un fournisseurs, et mettre en description plusieurs produits
+        qui seront ajouter avec la quantite.
+        et aussi prendre en compte si le modele existe deja
 
-- [ ] Simplifier l'ajout d'iphone avec insertion grouper simple et facile (ameliore bien l'application)
-    Inclure le fournisseurs, l'ajout de plusieurs iphone
+Ameliorations de l'experience utilisateur !
 
+- [*] Ajouter la details au niveaux des modele d'iphones
+- Rendre dynamique l'application avec htmx ! : Cela a permit de reduire le code javascript de l'application
+  - Verification de l'iphone lors de la vente (OK)
+  - Verification de l'iphone lors du retour (OK)
+  - Utilisation de htmx pour optimiser les performances
+
+### MAINTENANCE & TEST
+
+Je vais corriger les petites problemes pour preparer la plateforme a un deploiement
+et utilisation pour des clients
+
+- Corriger des bugs et documentation du code
+- Suppressions des fichiers inutiles
+- Enlever les fonctionnalites que j'utilise pas !
 
 ## DEPLOY
 
@@ -55,7 +73,9 @@ Bientot la fete de Tabaski, je dois faire un max de revenus pour subvenir a mes 
 c'est pour cela meme que j'ai rendu l'application multi-utilisateur pour faciliter l'utilisation
 et offrir a plusieurs utilisateurs.
 
-MON PLAN : Pour avoir mes 250.000 F
+MON PLAN : Pour avoir mes 250.000 F !
+
+Il faut que je la re-propose aux premiers clients !
 
 Proposer l'application a des vendeurs d'iphone
 commencer par les deux engages.

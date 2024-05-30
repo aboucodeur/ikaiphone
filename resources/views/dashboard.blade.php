@@ -17,7 +17,8 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="text-muted fw-semi-bold ">Stock</span>
-                        <span><i data-feather="truck" class="text-info"></i></span>
+                        <img width="25px" class="m-1" src="/assets/images/svg/delivery-truck.svg" alt="truck">
+                        {{-- <span><i data-feather="truck" class="text-info"></i></span> --}}
 
                     </div>
                     <div class="mt-4 mb-3 d-flex align-items-center lh-1">
@@ -33,11 +34,11 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="text-muted fw-semi-bold ">Retours</span>
-                        <span><i data-feather="dollar-sign" class="text-info"></i></span>
+                        <img width="25px" class="m-1" src="/assets/images/svg/arrow-back.svg" alt="arrow-back">
+                        {{-- <span><i data-feather="dollar-sign" class="text-info"></i></span> --}}
                     </div>
                     <div class="mt-4 mb-3 d-flex align-items-center lh-1">
                         <h3 class="fw-bold  mb-0">{{ $rets }}</h3>
-                        {{-- <span class="mt-1 ms-2 text-success "><i data-feather="arrow-up"class="icon-xs"></i>2.29%</span> --}}
                     </div>
                     <a href="{{ route('retour.index') }}" class="btn-link fw-semi-bold">Voir les retours</a>
                 </div>
@@ -48,12 +49,12 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="text-muted fw-semi-bold ">Clients</span>
-                        <span><i data-feather="user" class="text-info"></i></span>
+                        <img width="25px" class="m-1" src="/assets/images/svg/group.svg" alt="group">
+                        {{-- <span><i data-feather="user" class="text-info"></i></span> --}}
 
                     </div>
                     <div class="mt-4 mb-3 d-flex align-items-center lh-1">
                         <h3 class="fw-bold  mb-0">{{ $clients }}</h3>
-                        {{-- <span class="mt-1 ms-2 text-success "><i data-feather="arrow-up"class="icon-xs"></i>5.16%</span> --}}
                     </div>
                     <a href="{{ route('client.index') }}" class="btn-link fw-semi-bold">Voir Clients</a>
                 </div>
@@ -64,7 +65,8 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="text-muted fw-semi-bold ">Ventes</span>
-                        <span><i data-feather="credit-card" class="text-info"></i></span>
+                        {{-- <span><i data-feather="credit-card" class="text-info"></i></span> --}}
+                        <img width="25px" class="m-1" src="/assets/images/svg/shopping-cart-outline.svg" alt="shopping-cart-outline">
 
                     </div>
                     <div class="mt-4 mb-3 d-flex align-items-center lh-1">

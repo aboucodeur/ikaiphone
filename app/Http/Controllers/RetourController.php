@@ -28,32 +28,40 @@ class RetourController extends Controller
     public function index()
     {
         $en_id = auth()->user()->en_id;
-        $datas_iphones = [];
-
-        // filtrer par entreprise en joingant modele en verifant en_id
-        $iphones = Iphone::with(['modele', 'ventes'])->whereHas('modele', function ($query) use ($en_id) {
-            $query->where('en_id', '=', $en_id);
-        })->get();
-
-        foreach ($iphones as $key => $iphone) {
-            /**
-             * La relation entre l'iphones et vendres est (n,n) -> vcommandes
-             * Mais la commande est unique c'est pour cela qu'on permet de recuperer toujours la dernier
-             */
-            $v_count = $iphone->ventes->count();
-            $vendre = $iphone->ventes[$v_count - 1];
-            $datas_iphones[] = [
-                'id' => $iphone->i_id,
-                'modele' => $iphone->modele->m_nom,
-                'type' => $iphone->modele->m_type,
-                'memoire' => $iphone->modele->m_memoire,
-                'barcode' => $iphone->i_barcode,
-                'client' => $vendre->client->c_nom,
-                'date_vente' => $vendre->pivot->created_at,
-            ];
-        }
         $retours = Retour::query()->latest('created_at')->get();
-        return view('pages.retour.index', compact('retours', 'datas_iphones'));
+        return view('pages.retour.index', compact('retours'));
+    }
+
+    public function checkIphone(Request $request)
+    {
+        $en_id = auth()->user()->en_id;
+        $iphone = Iphone::whereHas('modele', function ($query) use ($en_id) {
+            $query->where('en_id', $en_id);
+        })->where('i_barcode', '=', $request->barcode ? $request->barcode : $request->i_ech_id)->first();
+
+
+        $html = '';
+        if (!isset($iphone)) $html = '<p class="m-0 text-center text-danger">Aucun iPhone trouvé</p>';
+        else {
+            $vendre = $iphone?->ventes->first() ? $iphone?->ventes->first() : null;
+            if ($vendre)  $html = '
+                                <h5 class="m-0">Infos iPhone </h5>
+                                <p class="m-0">Nom du modele : ' . $iphone->modele->m_nom . '</p>
+                                <p class="m-0">Type : ' . $iphone->modele->m_type . '</p>
+                                <p class="m-0">Memoire : ' . $iphone->modele->m_memoire . '</p>
+                                <p class="m-0">Client : ' . $vendre?->client->c_nom . ' </p>
+                                <p class="m-0">Vendu aux prix : ' . $vendre?->pivot->vc_prix . ' </p>
+                                <p class="m-0">Date : ' . $vendre?->pivot->created_at . '</p>
+                            ';
+            else    $html = '
+                            <h5 class="m-0">Arrivage iPhone </h5>
+                            <p class="m-0">Nom du modele : ' . $iphone->modele->m_nom . '</p>
+                            <p class="m-0">Type : ' . $iphone->modele->m_type . '</p>
+                            <p class="m-0">Memoire : ' . $iphone->modele->m_memoire . '</p>
+                        ';
+        }
+
+        return response($html, 200)->header('Content-Type', 'text/html');
     }
 
     // ! fix : Ajouter un retour d'iphone
@@ -78,16 +86,24 @@ class RetourController extends Controller
 
 
         // echanger contre une nouvelle arrivage d'iphone
-        $ids = Iphone::whereHas('retours')->pluck('i_id');
+        $ids = Iphone::withCount('retour')->get()->where('retour_count', '>', 0)->pluck('i_id');
         $arrivages = Iphone::with(['modele'])
-            ->whereHas('ventes', function ($query) {
-                $query->havingRaw('COUNT(*) < 1');
-            })
+            ->withCount('ventes')
+            ->get()
+            ->where('ventes_count', '<', 1)
             ->where('modele.m_qte', '>', 0)
-            ->whereNotIn('i_id', $ids)
-            ->get();
+            ->where('modele.en_id', '=', $en_id);
+        if (count($ids) > 0) $arrivages->whereNotIn('iphones.i_id', ...$ids);
         $ech_iphone = $arrivages->where('i_barcode', '=', $datas['i_ech_id'])->first();
-        if ($donnees->ventes[0]->pivot && $is_not_same && isset($ech_iphone->i_id)) Retour::create([
+
+
+        // ! Lors de l'implementation d'une petite fonctionnalite je viens de voir une grosse probleme dans l'application !
+        // des problemes peut apparaitre ici il peut faire expres de ne pas valider la premiere et valider la deuxieme
+        // or que je veux juste savoir si l'iphone a ete vendu ou pas
+        // mais la contrainte de la base de donnee empeche d'ajouter deux fois l'iphone sauf si on supprimer donc sa marche encore !
+        // pour retourner l'iphone il faut que l'iphone ait ete vendu donc la commande valider
+        // j'ai vus cet probleme dans lapplication : Peut venir si les contraintes ne sont pas appliquer
+        if ($donnees->ventes[0]->pivot->vc_etat > 0 && $is_not_same && isset($ech_iphone->i_id)) Retour::create([
             're_date' => $datas['re_date'],
             're_motif' => $datas['re_motif'],
             'i_id' => $find_iphone->i_id,
@@ -97,20 +113,23 @@ class RetourController extends Controller
         return redirect()->route('retour.index');
     }
 
-    // TODO : Valider le retour d'iphone
     public function validRetour(Retour $retour)
     {
         $en_id = auth()->user()->en_id;
         if ($retour->en_id !== $en_id) abort(403, 'Vous n\'êtes pas autorisé à faire ça !');
-
         // enlever -1 du stock de l'iphone (modele)
-        $retour->update(['etat' => 1]);
-        $retour->iphoneEchange->modele->update([
-            'm_qte' => DB::raw('m_qte - 1')
-        ]);
+        DB::transaction(function () use ($retour) {
+            $retour->update(['etat' => 1]);
+            $retour->iphoneEchange->modele->update([
+                'm_qte' => DB::raw('m_qte - 1')
+            ]);
+            // supprimer les paiements et les commandes de ventes
+            $retour->iphoneRetourne->paiements()->delete();
+            $commandes = $retour->iphoneRetourne->ventes->pluck('v_id');
+            $retour->iphoneRetourne->ventes()->detach([...$commandes]);
+        });
 
-        $retour->iphoneRetourne->paiements()->delete();
-        $retour->iphoneRetourne->ventes()->detach();
+
         return redirect()->route('retour.index');
     }
 

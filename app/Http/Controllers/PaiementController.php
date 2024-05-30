@@ -17,6 +17,8 @@ class PaiementController extends Controller
         $is_not_pay = $get_pay == "np";
         $is_all_pay = !isset($get_pay) || $get_pay == "all";
 
+        // adapter pour que la requete soit adapté au niveau de l'entreprise
+        $en_id = auth()->user()->en_id;
         $etats_pay_ventes = DB::table('vcommandes AS v')
             ->select(
                 'm.m_nom',
@@ -33,6 +35,7 @@ class PaiementController extends Controller
             ->join('modeles AS m', 'i.m_id', '=', 'm.m_id')
             ->join('clients AS c', 'vendres.c_id', '=', 'c.c_id')
             ->leftJoin(DB::raw('(SELECT SUM(COALESCE(vp_montant, 0)) AS montant, i_id FROM vpaiements GROUP BY i_id) AS vp'), 'v.i_id', '=', 'vp.i_id')
+            ->where('c.en_id', '=', $en_id)
             ->whereRaw(
                 $is_pay
                     ? '(v.vc_prix - COALESCE(vp.montant, 0)) = 0'

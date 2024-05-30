@@ -3,12 +3,18 @@
         @csrf
 
         <div class="content d-row text-center align-items-center justify-content-center gap-5 mb-5">
-            {{-- <img width="100" src="/assets/images/ben_services_logo.png" class="img-fluid rounded-top" alt="" /> --}}
-            <h2>IKA IPHONE</h2>
-            <small
-                title="Nous savons que la vente d'iphone n'est pas facile. C'est pour cela avec IKA IPHONE vous allez faire le compte facilement,rapidement et sans mettre votre vie en danger oui"
-                class="text-muted fs-3">Allez a la maison
-                sans probleme !</small>
+            <div class="d-flex justify-content-between align-items-center">
+                <img width="100" src="/assets/images/favicon/android-chrome-512x512.png" class="img-fluid rounded-top"
+                    alt="" />
+                <div class="text-right">
+                    <h2>IKA IPHONE</h2>
+                    <small
+                        title="Nous savons que la vente d'iphone n'est pas facile. C'est pour cela avec IKA IPHONE vous allez faire le compte facilement,rapidement et sans mettre votre vie en danger oui"
+                        class="text-muted  fs-5">
+                        Fermer votre boutique sans probleme !
+                    </small>
+                </div>
+            </div>
         </div>
 
         @if ($errors->any())
@@ -45,6 +51,7 @@
         <button type="submit" class="btn btn-primary">
             Se connecter
         </button>
+        <p class="text-center mt-5 mb-0">&copy; Copyright {{ date('Y') }} ~ Aboubacar (Sous licence)</p>
     </form>
 </x-invite>
 

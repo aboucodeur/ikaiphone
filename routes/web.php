@@ -16,13 +16,8 @@ use App\Models\Fournisseur;
 use App\Models\Modele;
 use App\Models\Retour;
 use App\Models\Vendre;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'user_type:admin,user'])->group(function () {
     // vendres
@@ -32,14 +27,18 @@ Route::middleware(['auth', 'user_type:admin,user'])->group(function () {
     Route::put('vendre/commande/{vendre}/edit', [VendreController::class, 'validCommande'])->name('vendre.validCommande');
     Route::delete('vendre/commande/{vendre}', [VendreController::class, 'remCommande'])->name('vendre.remCommande');
     Route::post('vendre/client/', [ClientController::class, 'storeFast'])->name('vendre.client.fast');
+    // ! fix : Prevent show get request
+    Route::get('vendre/check/iphone', [VendreController::class, 'checkIphone'])->name('vendre.checkIphone');
+
     // paiement de la vente
     Route::get('vendre/{vendre}/paiement/{iphone}', [VendreController::class, 'paiementPage'])->name('vendre.paiement.index');
     Route::post('vendre/{vendre}/paiement', [VendreController::class, 'addPaiement'])->name('vendre.paiement.create');
     Route::put('vendre/{vpaiement}/paiement', [VendreController::class, 'validPaiement'])->name('vendre.paiement.valid');
     Route::delete('vendre/{vpaiement}/paiement', [VendreController::class, 'remPaiement'])->name('vendre.paiement.destroy');
     // retours
-    Route::resource('retour', RetourController::class, ['except' => ['create']]);
+    Route::resource('retour', RetourController::class, ['except' => ['create', 'show']]);
     Route::put('retour/{retour}/valid', [RetourController::class, 'validRetour'])->name('retour.valid');
+    Route::get('retour/check-iphone', [RetourController::class, 'checkIphone'])->name('retour.checkIphone');
     Route::resource('client', ClientController::class, ['except' => ['edit', 'create']]);
     // liste des paiements
     Route::get('/paiement', [PaiementController::class, 'index'])->name('paiement.index');
@@ -47,7 +46,6 @@ Route::middleware(['auth', 'user_type:admin,user'])->group(function () {
 
 Route::middleware(['auth', 'user_type:admin'])->group(function () {
     // ** DASHBOARD
-    // TODO : Adapter les requetes pour l'entreprise donner
     Route::get('/', function () {
         $en_id = auth()->user()->en_id; // identifiant de l'entreprise de l'utilisateur
 
@@ -154,7 +152,6 @@ Route::middleware(['auth', 'user_type:admin'])->group(function () {
     })->name('home');
 
     // ** Impression des documents
-    // TODO :  Adapter les requetes pour l'entreprise donner
     Route::prefix('/docs')->group(function () {
         Route::get('/paiements', [DocController::class, 'printPayment'])->name('pdf.all.pay');
         Route::get('/client/{id}', [DocController::class, 'printClientPay'])->name('pdf.client.pay');
@@ -168,7 +165,6 @@ Route::middleware(['auth', 'user_type:admin'])->group(function () {
     Route::put('iphone/restore/{id}', [IphoneController::class, 'restore'])->name('iphone.restore');
 
     Route::resource('fournisseur', FournisseurController::class, ['except' => ['edit', 'create', 'show']]);
-
 
     // ** Achats
     Route::resource('achat', AchatController::class);

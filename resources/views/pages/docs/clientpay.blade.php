@@ -86,7 +86,7 @@
         </div>
 
         <hr id="divider">
-
+        Entreprise
         <div id="content">
             <table>
                 <thead>

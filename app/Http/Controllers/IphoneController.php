@@ -8,21 +8,6 @@ use Illuminate\Http\Request;
 
 class IphoneController extends Controller
 {
-    public function index(Request $request)
-    {
-        $is_soft = $request->get('f') == "soft";
-        $iphones = Iphone::query()->latest('created_at')->get();
-        if ($is_soft) $iphones = Iphone::onlyTrashed()->latest('created_at')->get();
-        $modeles = Modele::query()->latest('created_at')->get();
-        return view('pages.iphone.index', compact('iphones', 'modeles'));
-    }
-
-    public function create()
-    {
-        $modeles = Modele::query()->latest('created_at')->get();
-        return view('pages.iphone.create', compact('modeles'));
-    }
-
     public function store(Request $request)
     {
 
@@ -34,12 +19,6 @@ class IphoneController extends Controller
         return redirect()->route('iphone.index');
     }
 
-    public function edit(Iphone $iphone)
-    {
-        $modeles = Modele::query()->latest('created_at')->get();
-        return view('pages.iphone.edit', compact('iphone', 'modeles'));
-    }
-
     public function update(Request $request, Iphone $iphone)
     {
         $datas = $request->validate([
@@ -48,13 +27,15 @@ class IphoneController extends Controller
         ]);
 
         $iphone->update($datas);
-        return redirect()->route('iphone.index');
+        // return redirect()->route('iphone.index');
+        return redirect()->route('modele.index');
     }
 
     public function destroy(Iphone $iphone)
     {
         $iphone->delete();
-        return redirect()->route('iphone.index');
+        // return redirect()->route('iphone.index');
+        return redirect()->route('modele.index');
     }
 
     public function restore(String $id)

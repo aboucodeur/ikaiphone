@@ -1,4 +1,4 @@
-<x-default appTitle="OKI">
+<x-default>
     <div class="row">
         <div class="col-lg-12 mb-5">
             <div class="card h-100">
@@ -37,8 +37,6 @@
                                 <tr>
                                     <th class="p-1 m-0 ns" scope="col">N</th>
                                     <th scope="col">NOM</th>
-                                    {{-- <th scope="col">TYPE</th> --}}
-                                    <th scope="col">MEMOIRE</th>
                                     <th scope="col">QTE</th>
                                     <th scope="col">PRIX VENTE</th>
                                     <th scope="col">ACTION</th>
@@ -49,13 +47,56 @@
                                     <tr>
                                         <td scope="row" class="t_num">{{ $idx + 1 }}</td>
                                         <td class="w-15">
-                                            <strong class="text-primary">{{ Str::upper($modele->m_nom) }}</strong>
-                                            {{ $modele->m_type }}
-                                        </td>
-                                        {{-- <td><strong>{{ $modele->m_type }}</strong></td> --}}
-                                        <td>
-                                            <strong>{{ $modele->m_memoire }}</strong>
-                                            <sub>GO</sub>
+                                            <details>
+                                                <summary>
+                                                    <strong
+                                                        class="text-primary">{{ Str::upper($modele->m_nom) }}</strong>
+                                                    {{ $modele->m_type }} ~ {{ $modele->m_memoire }} (GO)
+                                                </summary>
+                                                {{-- Afficher tous les iphones qui decoules de ce modele --}}
+                                                <div class="mt-1">
+                                                    @if (empty($modele->iphones))
+                                                        <p class="text-center">Aucun iPhone trouvé</p>
+                                                    @else
+                                                    @endif
+                                                    <table class="table">
+                                                        @foreach ($modele->iphones as $iphone)
+                                                            <tr>
+                                                                <td>
+                                                                    <p class="m-0 font-bold">
+                                                                        IMEI : {{ $iphone->i_barcode }}
+                                                                        /
+                                                                        Etat :
+                                                                        {{ $iphone->ventes->count() > 0 ? 'Vendu' : '----' }}
+                                                                    </p>
+                                                                </td>
+                                                                <td>
+                                                                    {{ \App\Helpers\ModalHelper::action(
+                                                                        'editIphone',
+                                                                        '<i style="font-size: 1rem;" class="bi bi-pencil"></i>',
+                                                                        [
+                                                                            'route' => route('iphone.update', $iphone),
+                                                                            'datas' => json_encode($iphone),
+                                                                        ],
+                                                                        'btn-sm',
+                                                                    ) }}
+
+                                                                    {{ \App\Helpers\ModalHelper::action(
+                                                                        'deleteIphone',
+                                                                        '<i style="font-size: 1rem;" class="bi bi-trash"></i>',
+                                                                        [
+                                                                            'route' => route('iphone.update', $iphone),
+                                                                            'datas' => json_encode($iphone),
+                                                                            'modele' => json_encode($iphone->modele),
+                                                                        ],
+                                                                        'btn-sm btn-danger text-danger rounded-circle',
+                                                                    ) }}
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </table>
+                                                </div>
+                                            </details>
                                         </td>
                                         <td class="text-center">
                                             @if ($modele->m_qte > 0)
@@ -112,6 +153,7 @@
         </div>
     </div>
 
+    {{-- MAIN MODAL --}}
     @extends('includes.modal', [
         'id' => 'addModele',
         'fid' => 'faddModele',
@@ -149,6 +191,33 @@
         <button type="submit" class="btn btn-danger">Oui</button>
     @endsection
 
+    {{-- IPHONE MODAL --}}
+    @extends('includes.modal', [
+        'id' => 'editIphone',
+        'title' => 'Modification iPhone',
+        'fid' => 'feditIphone',
+        'fmethod' => 'PUT',
+        'b2Type' => 'submit',
+    ])
+    @section('content_editIphone')
+        @include('pages.iphone.edit', compact('modeles'))
+    @endsection
+
+    @extends('includes.modal', [
+        'id' => 'deleteIphone',
+        'title' => 'Modification iPhone',
+        'fid' => 'fdeleteIphone',
+        'fmethod' => 'DELETE',
+        'b2Type' => 'submit',
+    ])
+    @section('content_deleteIphone')
+        <p id="content_message_deleteIphone"></p>
+    @endsection
+    @section('footer_deleteIphone')
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+        <button type="submit" class="btn btn-danger">Oui</button>
+    @endsection
+
 </x-default>
 
 @if (count($errors) > 0)
@@ -175,6 +244,8 @@
                 if (saved) localStorage.removeItem('l_modal');
             }
         }
+
+        //**MODELE**//
 
         // Nouveaux modele
         $('#addModeleBtn').click(function(e) {
@@ -217,6 +288,46 @@
                 <p>
                     Etes-vous sure de supprimer le modele <strong>${datas['m_nom']}</strong> de type
                     <strong>${datas['m_type']}</strong> avec une memoire de <strong>${datas['m_memoire']}</strong> GO.
+                </p>
+            `)
+
+        });
+
+        // **IPHONE**//
+        // Modification iphone
+        $('.editIphoneBtn').click(function(e) {
+            var datas = $(this).data('datas');
+            var route = $(this).data('route');
+            var form = $('#feditIphone');
+            form.attr('action', route);
+
+            setTimeout(() => {
+                form.find('#i_barcode').focus();
+            }, 1000);
+
+            form.find("#i_barcode").val(datas['i_barcode'])
+            $('#m_id option').each(function() {
+                if ($(this).val() == datas['m_id']) {
+                    $(this).prop('selected', true);
+                    return false;
+                }
+            });
+
+        });
+
+        // Suppression modele
+        $('.deleteIphoneBtn').click(function(e) {
+            var datas = $(this).data('datas');
+            var route = $(this).data('route');
+            var modele = $(this).data('modele');
+
+            var form = $('#fdeleteIphone');
+            form.attr('action', route);
+
+            form.find("#content_message_deleteIphone").html(`
+                <p>
+                    Etes-vous sure de supprimer l'iphone <strong>${modele['m_nom']}</strong>
+                    avec le code bare ${datas['i_barcode']}.
                 </p>
             `)
 
