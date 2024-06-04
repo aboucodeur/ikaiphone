@@ -11,7 +11,7 @@
                     <img width="25px" class="m-1" src="/assets/images/svg/stockchart.svg" alt="dashboard">
                 </x-menu>
 
-                <x-menu title="{{ Str::upper('Modele') }}" url="/modele">
+                <x-menu title="{{ Str::upper('STOCKS') }}" url="/modele">
                     {{-- <x-iicon src="/assets/icons/modele.png" alt="modele" /> --}}
                     <img width="25px" class="m-1" src="/assets/images/svg/layers.svg" alt="modeles">
                 </x-menu>

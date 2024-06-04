@@ -19,9 +19,11 @@ class DocController extends Controller
 
         $ventes = DB::table('vcommandes AS v')
             ->select(
+                'm.m_id',
                 'm.m_nom',
                 'm.m_type',
                 'm.m_memoire',
+                'i.i_barcode',
                 'c.c_nom',
                 DB::raw('SUM(COALESCE(vp.montant, 0)) AS montant'),
                 DB::raw('v.vc_prix - SUM(COALESCE(vp.montant, 0)) AS reste'),
@@ -35,7 +37,8 @@ class DocController extends Controller
             ->join('modeles AS m', 'i.m_id', '=', 'm.m_id')
             ->whereRaw("DATE_TRUNC('month', v.created_at) >= DATE_TRUNC('month', NOW() - INTERVAL '3 months')")
             ->where('c.en_id', '=', $en_id)
-            ->groupBy('m.m_nom', 'c.c_nom', 'v.vc_prix', 'mois_courant', 'm.m_type', 'm.m_memoire')
+            ->where('v.vc_etat', '=', 1)
+            ->groupBy('m.m_id', 'i.i_id', 'c.c_nom', 'v.vc_prix', 'mois_courant', 'm.m_type', 'm.m_memoire')
             ->orderBy('dernier_paiement', 'asc')
             ->get();
 
@@ -50,7 +53,7 @@ class DocController extends Controller
         $options->set('isHtml5ParserEnabled', true);
         $pdf->setOptions($options);
 
-        $view = View::make('pages.docs.pdfpaiement', compact('ventes','entreprise'))->render();
+        $view = View::make('pages.docs.pdfpaiement', compact('ventes', 'entreprise'))->render();
         $pdf->loadHtml($view);
         $pdf->setPaper('A4');
         $pdf->render();
@@ -84,6 +87,7 @@ class DocController extends Controller
             ->join('modeles AS m', 'i.m_id', '=', 'm.m_id')
             ->where('c.c_id', '=', $client->c_id)
             ->where('c.en_id', '=', $en_id)
+            ->where('vc.vc_etat', '=', 1)
             ->groupBy('m.m_nom', 'v.v_id', 'i.i_barcode', 'm.m_memoire', 'm.m_type', 'vc.vc_prix', 'vp.montant')
             ->get();
 
@@ -133,6 +137,7 @@ class DocController extends Controller
             ->leftJoin(DB::raw('(SELECT SUM(COALESCE(vp_montant, 0)) AS montant, i_id FROM vpaiements GROUP BY i_id) AS vp'), 'v.i_id', '=', 'vp.i_id')
             ->whereRaw('(v.vc_prix - COALESCE(vp.montant, 0)) > 0')
             ->where('c.en_id', '=', $en_id)
+            ->where('v.vc_etat', '=', 1)
             ->orderBy('v.created_at', 'desc')
             ->get();
 

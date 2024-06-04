@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'user_type:admin,user'])->group(function () {
     // vendres
-    Route::resource('vendre', VendreController::class);
+    Route::resource('vendre', VendreController::class, ['except' => ['create']]);
     Route::post('vendre/commande/{vendre}', [VendreController::class, 'addCommande'])->name('vendre.addCommande');
     Route::put('vendre/commande/{vendre}/validate', [VendreController::class, 'editCommande'])->name('vendre.editCommande');
     Route::put('vendre/commande/{vendre}/edit', [VendreController::class, 'validCommande'])->name('vendre.validCommande');
@@ -36,9 +36,9 @@ Route::middleware(['auth', 'user_type:admin,user'])->group(function () {
     Route::put('vendre/{vpaiement}/paiement', [VendreController::class, 'validPaiement'])->name('vendre.paiement.valid');
     Route::delete('vendre/{vpaiement}/paiement', [VendreController::class, 'remPaiement'])->name('vendre.paiement.destroy');
     // retours
-    Route::resource('retour', RetourController::class, ['except' => ['create', 'show']]);
+    Route::resource('retour', RetourController::class, ['except' => ['create', 'show', 'edit']]);
     Route::put('retour/{retour}/valid', [RetourController::class, 'validRetour'])->name('retour.valid');
-    Route::get('retour/check-iphone', [RetourController::class, 'checkIphone'])->name('retour.checkIphone');
+    // Route::get('retour/check-iphone', [RetourController::class, 'checkIphone'])->name('retour.checkIphone');
     Route::resource('client', ClientController::class, ['except' => ['edit', 'create']]);
     // liste des paiements
     Route::get('/paiement', [PaiementController::class, 'index'])->name('paiement.index');
@@ -49,7 +49,7 @@ Route::middleware(['auth', 'user_type:admin'])->group(function () {
     Route::get('/', function () {
         $en_id = auth()->user()->en_id; // identifiant de l'entreprise de l'utilisateur
 
-        // Affiche le nombres d'impayes par clients
+        // Affiche le nombres d'impayes par clients : avec seulement les commandes valider !
         $clients_commandes = DB::table('clients AS c')
             ->select(
                 'c.c_nom',
@@ -59,15 +59,20 @@ Route::middleware(['auth', 'user_type:admin'])->group(function () {
             ->join('vendres AS v', 'c.c_id', '=', 'v.c_id')
             ->join('vcommandes AS vc', 'v.v_id', '=', 'vc.v_id')
             ->leftJoin(DB::raw('(SELECT SUM(COALESCE(vp_montant, 0)) AS montant, i_id FROM vpaiements GROUP BY i_id) AS vp'), 'vc.i_id', '=', 'vp.i_id')
-            ->whereRaw('(vc.vc_prix - COALESCE(vp.montant, 0)) > 0 and c.en_id = :en_id', ['en_id' => $en_id]) // les clients qui trop d'impayer
+            ->whereRaw('(vc.vc_prix - COALESCE(vp.montant, 0)) > 0 and c.en_id = :en_id and vc.vc_etat = 1', ['en_id' => $en_id]) // les clients qui trop d'impayer
             ->groupBy('c.c_nom', 'c.c_id')
             ->orderBy('nombre_dettes', 'desc')
             ->get();
 
-        // Etats des sorties et paiements des trois derniers mois
+        // Etats des sorties et paiements des trois derniers mois : avec seulement les commandes valider !
+        // ! fix bugs : la reflexion est plus importante que le code ici i.i_id a corriger le probleme
         $etats_pay_ventes = DB::table('vcommandes AS v')
             ->select(
+                'm.m_id',
                 'm.m_nom',
+                'm.m_type',
+                'm.m_memoire',
+                'i.i_barcode',
                 'c.c_nom',
                 DB::raw('SUM(COALESCE(vp.montant, 0)) AS montant'),
                 DB::raw('v.vc_prix - SUM(COALESCE(vp.montant, 0)) AS reste'),
@@ -81,44 +86,63 @@ Route::middleware(['auth', 'user_type:admin'])->group(function () {
             ->join('modeles AS m', 'i.m_id', '=', 'm.m_id')
             ->whereRaw("DATE_TRUNC('month', v.created_at) >= DATE_TRUNC('month', NOW() - INTERVAL '3 months')") // Filtrer sur les trois derniers mois
             ->where('c.en_id', $en_id)
-            ->groupBy('m.m_nom', 'c.c_nom', 'v.vc_prix', 'mois_courant')
+            ->where('v.vc_etat', '=', 1)
+            ->groupBy('m.m_id', 'i.i_id', 'c.c_nom', 'v.vc_prix', 'mois_courant')
             ->orderBy('dernier_paiement', 'asc')
             ->get();
 
-        // Les top 10 modeles d'iphone le plus vendus
-        $ventes_per_iphones = DB::table('vcommandes')
+        // Les top 10 modeles d'iphone le plus vendus : avec seulement les commandes valider !
+        $ventes_per_iphones = DB::table('vcommandes AS v')
             ->select('m_nom', DB::raw('COUNT(*) as total_ventes'))
-            ->join('iphones', 'vcommandes.i_id', '=', 'iphones.i_id')
+            ->join('iphones', 'v.i_id', '=', 'iphones.i_id')
             ->join('modeles', 'iphones.m_id', '=', 'modeles.m_id')
             ->where('modeles.en_id', '=', $en_id)
+            ->where('v.vc_etat', '=', 1)
             ->groupBy('m_nom')
             ->orderByDesc('total_ventes')
             ->limit(10)
             ->get()->toArray();
 
-        // Les top 10 clients qui achete le plus
+        // Les top 10 clients qui achete le plus : avec seulement les commandes valider !
         $ventes_per_clients = DB::table('vendres')
             ->select('c_nom', DB::raw('COUNT(*) as nb_ventes'))
             ->join('clients', 'vendres.c_id', '=', 'clients.c_id')
-            ->join('vcommandes', 'vendres.v_id', '=', 'vcommandes.v_id')
+            ->join('vcommandes as v', 'vendres.v_id', '=', 'v.v_id')
             ->where('clients.en_id', '=', $en_id)
+            ->where('v.vc_etat', '=', 1)
             ->groupBy('c_nom')
             ->orderByDesc('nb_ventes')
             ->limit(10)
             ->get()->toArray();
-
-        // Recette du jours
+        $user_choice = request()->get('f_recette') ?? 'j';
         $recette_jours =  DB::table('vcommandes AS v')
             ->select(
                 'c.c_nom AS client',
+                'modeles.m_id',
+                'modeles.m_nom',
+                'modeles.m_type',
+                'modeles.m_memoire',
                 DB::raw('SUM(COALESCE(vp.montant, 0)) AS montant_payer')
             )
             ->join('vendres', 'v.v_id', '=', 'vendres.v_id')
             ->join('clients AS c', 'vendres.c_id', '=', 'c.c_id')
+            ->join('iphones', 'v.i_id', '=', 'iphones.i_id')
+            ->join('modeles', 'iphones.m_id', '=', 'modeles.m_id')
+            ->where('modeles.en_id', '=', $en_id)
             ->leftJoin(DB::raw('(SELECT SUM(COALESCE(vp_montant, 0)) AS montant, v_id FROM vpaiements GROUP BY v_id) AS vp'), 'v.v_id', '=', 'vp.v_id')
-            ->whereDate('v.created_at', '=', 'now()') // Filtrer par date du jour
+            ->where(function ($query) use ($user_choice) {
+                if ($user_choice === 'j') {
+                    $query->whereDate('v.created_at', '=', now());
+                } elseif ($user_choice === 'm') {
+                    $query->whereMonth('v.created_at', '=', now()->month)
+                        ->whereYear('v.created_at', '=', now()->year);
+                } elseif ($user_choice === 'a') {
+                    $query->whereYear('v.created_at', '=', now()->year);
+                }
+            })
             ->where('c.en_id', '=', $en_id)
-            ->groupBy('c.c_nom')
+            ->where('v.vc_etat', '=', 1)
+            ->groupBy('c.c_nom', 'modeles.m_id')
             ->get();
         $somme_recette = $recette_jours->sum('montant_payer');
 

@@ -1,0 +1,25 @@
+# PROMPTS
+
+En tant que développeur expérimenté avec des compétences en Laravel et PHP, tu seras chargé d'implémenter une fonctionnalité spécifique d'une application conformément au cahier des charges.
+
+La gestion de stock étant un processus complexe pour les entreprises, la plateforme doit simplifier ce processus en tenant compte de tous les facteurs impliqués.
+
+Prenons l'exemple de la vente d'iPhone : il peut y avoir plusieurs mouvements dans le stock qui l'augmentent ou le diminuent, en fonction des opérations effectuées.
+
+Voici quelques exemples :
+    - Un iPhone peut être en attente dans une commande (vc_etat = 0)
+    - Un iPhone peut être confirmé dans la commande (vc_etat = 1)
+    - Un iPhone peut être retourné (vc_etat = 2)
+    - Un iPhone peut être échangé contre d'autres produits (vc_etat = 3)
+    - Un iPhone peut être annulé de la commande (vc_etat = 4)
+
+Chacune de ces opérations a des conséquences sur :
+    - la quantité disponible du modèle d'iPhone
+    - les paiements associés
+
+Tu es maintenant chargé de développer un helper pour connaître l'état en temps réel de l'iPhone en fonction de ces informations et des tables de la base de données fournies.
+
+Numero de serie iphone : 123451;123452;123453;123454;123455;123456;123457;123458;123459;1234510
+
+En isolant la logique dans des classes , la scalabilité de l'application a été améliorée.
+et aussi l'ajout des bloc de fonctionnalité devient facile.

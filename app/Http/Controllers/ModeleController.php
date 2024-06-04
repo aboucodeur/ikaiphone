@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class ModeleController extends Controller
 {
-    // TODO : Adapter la fonction index pour prendre en compte l'entreprise
+    // OK
     public function index(Request $request)
     {
         // $modeles =  Modele::query()->latest('created_at')->withCount('iphones')->get();
@@ -37,7 +37,7 @@ class ModeleController extends Controller
         return view('pages.modele.index', compact('modeles', 'types_iphones', 'fournisseurs'));
     }
 
-    // TODO : Adapter la fonction store pour prendre en compte l'entreprise
+    // OK
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -52,8 +52,8 @@ class ModeleController extends Controller
         $data['m_qte'] = 0;
         $data['en_id'] = $en_id;
         // recuperer ou creer le modele
-        // $modele = Modele::create($data); // recuperer le modele creer
-        $modele = Modele::firstOrCreate(['m_nom' => $data['m_nom'], 'm_type' => $data['m_type'], 'm_memoire' => $data['m_memoire'], 'm_prix' => $data['m_prix'], 'm_qte' => 0, 'en_id' => $en_id]);
+        // $modele = Modele::create($data); // recuperer le modele creer ignore : 'm_qte' => 0,
+        $modele = Modele::firstOrCreate(['m_nom' => $data['m_nom'], 'm_type' => $data['m_type'], 'm_memoire' => $data['m_memoire'], 'm_prix' => $data['m_prix'], 'en_id' => $en_id]);
 
         $imei_raw = $data['m_ids'];
         $imei_iphones = array_unique(array_filter(preg_split('/;/', $imei_raw), function ($code) {
@@ -67,7 +67,7 @@ class ModeleController extends Controller
                 // insertion iphone avec insertion du commande d'achat
                 DB::transaction(function () use ($modele, $imei, $achat, $data) { // ajout de data
                     try {
-                        $iphone = Iphone::create(['i_barcode' => $imei, 'm_id' => $modele->m_id]);
+                        $iphone = Iphone::create(['i_barcode' => trim($imei), 'm_id' => $modele->m_id]);
                         $achat->iphones()->attach($iphone->i_id, [
                             'ac_etat' => 0,
                             'ac_qte' => 1,
@@ -87,9 +87,10 @@ class ModeleController extends Controller
                 // insertion iphone avec mise a jour du stock
                 DB::transaction(function () use ($modele, $imei) {
                     try {
-                        Iphone::create(['i_barcode' => $imei, 'm_id' => $modele->m_id]);
-                        $modele->m_qte += 1;
-                        $modele->save();
+                        Iphone::create(['i_barcode' => trim($imei), 'm_id' => $modele->m_id]);
+                        $modele->increment('m_qte');
+                        // $modele->m_qte += 1;
+                        // $modele->save();
                     } catch (\Exception $e) {
                         // eviter pour une iphone qui existe
                         return;
@@ -100,7 +101,7 @@ class ModeleController extends Controller
         }
     }
 
-    // TODO : Adapter la fonction edit pour prendre en compte l'entreprise
+    // OK
     public function edit(Modele $modele)
     {
         if ($modele->en_id != Auth::user()->entreprise->en_id) return abort(404, 'Vous n\'êtes pas autorisé à modifier ce modèle');
@@ -120,7 +121,7 @@ class ModeleController extends Controller
         return redirect()->route('modele.index')->with('success', 'Modele mis à jour avec succès');
     }
 
-    // TODO : Adapter la fonction destroy pour prendre en compte l'entreprise
+    // OK
     public function destroy(Modele $modele)
     {
         if ($modele->en_id != Auth::user()->entreprise->en_id) return abort(404, 'Vous n\'êtes pas autorisé à supprimer ce modèle');

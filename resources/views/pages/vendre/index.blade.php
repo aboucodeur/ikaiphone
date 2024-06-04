@@ -16,12 +16,12 @@
                             <thead class="table-light">
                                 <tr>
                                     <th class="p-1 m-0 ns" scope="col">N</th>
-                                    <th scope="col">Date de la vente</th>
-                                    <th scope="col">Client / Revendeur</th>
-                                    <th>Montant</th>
-                                    <th>Reste</th>
-                                    <th scope="col">Type</th>
-                                    <th scope="col">Action</th>
+                                    <th scope="col">DATE</th>
+                                    <th scope="col">CLIENT</th>
+                                    <th>MONTANT</th>
+                                    <th>RESTE</th>
+                                    <th scope="col">TYPE</th>
+                                    <th scope="col">ACTION</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -31,8 +31,14 @@
                                     @endphp
                                     <tr>
                                         <td scope="row" class="t_num">{{ $idx + 1 }}</td>
-                                        <td>{{ explode(' ', $vendre->v_date)[0] }}</td>
-                                        <td>{{ $vendre->client->c_nom }}</td>
+                                        <td>
+                                            <strong>{{ $vendre->created_at }}</strong>
+                                        </td>
+                                        <td>
+                                            <a href="{{ route('vendre.show', $vendre) }}">
+                                                <strong>{{ Str::upper($vendre->client->c_nom) }}</strong>
+                                            </a>
+                                        </td>
                                         <td>{{ number_format($p['montant'], 0, '', ' ') }} <sub>F</sub></td>
                                         <td>{{ number_format($p['reste'], 0, '', ' ') }} <sub>F</sub></td>
                                         <td>{{ $vendre->v_type == 'REV' ? 'REVENDEUR' : 'SIMPLE' }}</td>

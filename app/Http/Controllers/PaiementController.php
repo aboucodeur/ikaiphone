@@ -36,13 +36,15 @@ class PaiementController extends Controller
             ->join('clients AS c', 'vendres.c_id', '=', 'c.c_id')
             ->leftJoin(DB::raw('(SELECT SUM(COALESCE(vp_montant, 0)) AS montant, i_id FROM vpaiements GROUP BY i_id) AS vp'), 'v.i_id', '=', 'vp.i_id')
             ->where('c.en_id', '=', $en_id)
+            ->where('v.vc_etat', '=', 1) // seulement les ventes valider
             ->whereRaw(
                 $is_pay
-                    ? '(v.vc_prix - COALESCE(vp.montant, 0)) = 0'
+                    ? '(v.vc_prix - COALESCE(montant, 0)) = 0 and vc_etat = 1'
                     : ($is_not_pay
-                        ? '(v.vc_prix - COALESCE(vp.montant, 0)) > 0'
-                        : '(v.vc_prix - COALESCE(vp.montant, 0)) > 0 or (v.vc_prix - COALESCE(vp.montant, 0)) = 0')
+                        ? '(v.vc_prix - COALESCE(montant, 0)) > 0 and vc_etat = 1'
+                        : '(v.vc_prix - COALESCE(montant, 0)) > 0 or (v.vc_prix - COALESCE(montant, 0)) = 0 and vc_etat = 1')
             )
+
             ->orderBy('etat_paiement', 'asc')
             ->get();
         return view('pages.paiement.index', compact('etats_pay_ventes'));

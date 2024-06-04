@@ -40,13 +40,13 @@ alter table vpaiements alter column vp_date set default now()::date;
 alter table vpaiements add constraint vpaiements_check1 check(vp_montant > -1);
 
 -- acommandes
-alter table acommandes add constraint acommandes_unique1 unique(i_id);
+-- alter table acommandes add constraint acommandes_unique1 unique(i_id);
 alter table acommandes add constraint acommandes_check1 check(ac_qte > 0);
 alter table acommandes add constraint acommandes_check2 check(ac_prix > -1);
 
 -- vcommandes : oui l'iphone est unique dans la commande
 
-alter table vcommandes add constraint vcommandes_unique1 unique(i_id);
+-- alter table vcommandes add constraint vcommandes_unique1 unique(i_id);
 alter table vcommandes add constraint vcommandes_check1 check(vc_qte > 0);
 alter table vcommandes add constraint vcommandes_check2 check(vc_prix > -1);
 

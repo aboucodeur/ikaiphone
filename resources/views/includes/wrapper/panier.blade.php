@@ -13,7 +13,42 @@
             </div>
         </div>
     </div>
+
+    <!-- MODALS / ECHANGE -->
+    @extends('includes.modal', [
+        'id' => 'addEchange',
+        'fid' => 'faddEchange',
+        'title' => 'Echanger l\'iphone',
+        'fmethod' => 'PUT',
+        'faction' => route('retour.store'),
+        'b2Type' => 'submit',
+    ])
+    @section('content_addEchange')
+        @include('pages.retour.create')
+    @endsection
+
 </x-default>
+
+{{-- SCRIPT ECHANGE --}}
+<script>
+    $(function() {
+        $(".addEchangeBtn").on("click", function() {
+            var route = $(this).data('route');
+            var i_id = $(this).data('i_id');
+            var type = $(this).data('type');
+            var form = $('#faddEchange');
+            form.attr('action', route);
+
+            // append i_id and type to form with jquery
+            $("#faddEchange").append(`<input type="hidden" name="i_id" value="${i_id}">`);
+            $("#faddEchange").append(`<input type="hidden" name="type" value="${type}">`);
+
+            setTimeout(() => {
+                form.find('#ip_ech_id').focus();
+            }, 1000);
+        })
+    })
+</script>
 
 @isset($run_script)
     <script>

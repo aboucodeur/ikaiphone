@@ -2,12 +2,17 @@
     <div class="row">
         <div class="col-lg-12 col-md-12 col-12">
             <!-- Page header -->
-            <div class="d-flex justify-content-between mb-5 align-items-center">
-                <h3 class="mb-0 text-success">STATS</h3>
+            <div class="d-flex justify-content-between mb-5 mt-5 align-items-center">
                 <a href="{{ route('paiement.index') }}" class="btn btn-sm btn-primary">
-                    <i class="bi bi-bank"></i> &nbsp;
+                    {{-- <i class="bi bi-bank"></i> &nbsp; --}}
                     Paiements
                 </a>
+                <marquee behavior="" direction="">
+                    <h4>
+                        Bienvenue {{ auth()->user()->entreprise->en_nom }}
+                        ~ laisser le logiciel reflechir a votre place !
+                    </h4>
+                </marquee>
             </div>
         </div>
     </div>
@@ -66,7 +71,8 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="text-muted fw-semi-bold ">Ventes</span>
                         {{-- <span><i data-feather="credit-card" class="text-info"></i></span> --}}
-                        <img width="25px" class="m-1" src="/assets/images/svg/shopping-cart-outline.svg" alt="shopping-cart-outline">
+                        <img width="25px" class="m-1" src="/assets/images/svg/shopping-cart-outline.svg"
+                            alt="shopping-cart-outline">
 
                     </div>
                     <div class="mt-4 mb-3 d-flex align-items-center lh-1">
@@ -84,14 +90,24 @@
         <div class="col-lg-6 mb-5">
             <div class="card h-100">
                 <div class="card-header">
-                    <div class="d-flex justify-content-between align-items-center g-2">
-                        <h4 class="mb-0 text-center">
-                            Recette du jours {{ date('d/m/Y H:i') }}
-                            <strong>
-                                {{ number_format($somme_recette, 0, '', ' ') }} <sup>F</sup>
-                            </strong>
-                        </h4>
-                    </div>
+                    <h4 class="mb-0 d-flex gap-1 justify-content-between">
+                        Recettes
+                        <strong>
+                            {{ number_format($somme_recette, 0, '', ' ') }} <sup>F</sup>
+                        </strong>
+                        <form method="GET">
+                            <div class="col-auto ms-2">
+                                <select onchange="submit();" name="f_recette" class="form-select form-select-sm">
+                                    <option value="j" {{ request()->get('f_recette') == 'j' ? 'selected' : '' }}>
+                                        Jours</option>
+                                    <option value="m" {{ request()->get('f_recette') == 'm' ? 'selected' : '' }}>
+                                        Mois</option>
+                                    <option value="a" {{ request()->get('f_recette') == 'a' ? 'selected' : '' }}>
+                                        Année</option>
+                                </select>
+                            </div>
+                        </form>
+                    </h4>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive table-card">
@@ -106,7 +122,12 @@
                                 <tbody>
                                     @foreach ($recette_jours as $rj)
                                         <tr>
-                                            <td>{{ $rj->client }}</td>
+                                            <td>{{ $rj->client }}
+                                                a pris
+                                                <strong>{{ $rj->m_nom }} {{ $rj->m_type }}</strong>
+                                                ({{ $rj->m_memoire }})
+                                                GO
+                                            </td>
                                             <td class="text-center">
                                                 {{ number_format($rj->montant_payer, 0, '', ' ') }} <sup>F</sup>
                                             </td>
@@ -134,21 +155,21 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>CLIENT</th>
-                                        <th>NB. COMMANDE</th>
-                                        <th>Facture</th>
+                                        <th>COMMANDE</th>
+                                        <th>Impression</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($clients_commandes as $cc)
                                         <tr>
-                                            <td>
+                                            <td class="w-30">
                                                 <strong class="text-primary">{{ Str::upper($cc->c_nom) }}</strong>
                                             </td>
-                                            <td>
-                                                A
-                                                <span class="badge badge-success-soft text-success">
+                                            <td class="w-3 text-wrap">
+                                                <strong>
                                                     {{ $cc->nombre_dettes }}
-                                                </span> commande(s) impayée(s)
+                                                </strong> commande(s) impayée(s)
+
                                             </td>
                                             <td>
                                                 <a target="_blank" class="btn btn-sm btn-primary"
@@ -192,7 +213,9 @@
                                 @foreach ($etats_pay_ventes as $ep)
                                     <tr>
                                         <td>
-                                            <strong class="text-primary">{{ Str::upper($ep->m_nom) }}</strong>
+                                            <strong class="text-primary">{{ Str::upper($ep->m_nom) }}
+                                                {{ Str::upper($ep->m_type) }} ({{ $ep->m_memoire }}) GO /
+                                                {{ $ep->i_barcode }}</strong>
                                         </td>
                                         <td>
                                             {{ Str::upper($ep->c_nom) }}

@@ -1,4 +1,4 @@
-@props(['route' => '#', 'iphones', 'datasiphones'])
+@props(['route' => '#'])
 
 <!-- Formulaire d'ajout -->
 <div class="card mb-4">
@@ -12,7 +12,7 @@
                         <input onkeypress="return (event.key!='Enter')" autofocus type="text" class="form-control"
                             name="vbarcode" id="vbarcode" aria-describedby="helpId" placeholder="Code bare" />
                         <button autofocus="false" type="button" id="valid_vente_btn" type="button"
-                            class="btn btn-sm btn-warning text-white fw-bold mt-2"
+                            class="btn btn-sm btn-primary w-100 text-white fw-bold mt-2"
                             hx-get="{{ route('vendre.checkIphone') }}" hx-target="#info_vente" hx-trigger="click"
                             hx-include="[name='vbarcode']" hx-headers='{"X-CSRF-TOKEN": "{{ csrf_token() }}"}'>
                             VERIFIER IMEI

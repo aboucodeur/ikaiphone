@@ -48,8 +48,15 @@ class Iphone extends Model
 
     }
 
-    public function retour()
+    // * Ameliorations de hasOne -> hasMany
+    public function retour() // remplacer
     {
-        return $this->hasOne(Retour::class, 'i_id');
+        return $this->hasMany(Retour::class, 'i_id');
+    }
+
+    // * Ameliorations de hasOne -> hasMany
+    public function retourner() // remplacant
+    {
+        return $this->hasMany(Retour::class, 'i_ech_id', 'i_id');
     }
 }

@@ -4,14 +4,12 @@
             <div class="card h-100">
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center gap-5 g-2">
-                        <h4>Modeles</h4>
-
+                        <h4>STOCKS</h4>
                         <button id="addModeleBtn" type="button" class="btn btn-sm btn-primary btn-lg"
                             data-bs-toggle="modal" data-bs-target="#addModele">
                             <i class="bi bi-plus-circle-fill"></i> &nbsp;
-                            Ajouter un modele
+                            Nouveaux modele
                         </button>
-
                         {{-- USER / EXPERIENCE SOFT DELETEION --}}
                         <form method="GET">
                             <div class="d-flex align-items-center">
@@ -27,7 +25,6 @@
                                 </div>
                             </div>
                         </form>
-
                     </div>
                 </div>
                 <div class="card-body">
@@ -36,9 +33,9 @@
                             <thead class="table-light p-0 mb-0">
                                 <tr>
                                     <th class="p-1 m-0 ns" scope="col">N</th>
-                                    <th scope="col">NOM</th>
+                                    <th scope="col">MODELE</th>
                                     <th scope="col">QTE</th>
-                                    <th scope="col">PRIX VENTE</th>
+                                    <th scope="col">PRIX DE BASE</th>
                                     <th scope="col">ACTION</th>
                                 </tr>
                             </thead>
@@ -56,41 +53,45 @@
                                                 {{-- Afficher tous les iphones qui decoules de ce modele --}}
                                                 <div class="mt-1">
                                                     @if (empty($modele->iphones))
-                                                        <p class="text-center">Aucun iPhone trouvé</p>
+                                                        <p class="text-center">Aucun iphone</p>
                                                     @else
                                                     @endif
                                                     <table class="table">
                                                         @foreach ($modele->iphones as $iphone)
                                                             <tr>
                                                                 <td>
+                                                                    {{-- TAPER *#06#  --}}
                                                                     <p class="m-0 font-bold">
-                                                                        IMEI : {{ $iphone->i_barcode }}
+                                                                        {{ $iphone->i_barcode }}
                                                                         /
-                                                                        Etat :
-                                                                        {{ $iphone->ventes->count() > 0 ? 'Vendu' : '----' }}
+                                                                        <strong>
+                                                                            {{ \App\Helpers\StockHelper::etat($iphone) === 'valider' ? 'vendu' : \App\Helpers\StockHelper::etat($iphone) }}
+                                                                        </strong>
                                                                     </p>
                                                                 </td>
                                                                 <td>
-                                                                    {{ \App\Helpers\ModalHelper::action(
-                                                                        'editIphone',
-                                                                        '<i style="font-size: 1rem;" class="bi bi-pencil"></i>',
-                                                                        [
-                                                                            'route' => route('iphone.update', $iphone),
-                                                                            'datas' => json_encode($iphone),
-                                                                        ],
-                                                                        'btn-sm',
-                                                                    ) }}
+                                                                    @if (\App\Helpers\StockHelper::iphoneEtat($iphone)['etat'] === -200)
+                                                                        {{ \App\Helpers\ModalHelper::action(
+                                                                            'editIphone',
+                                                                            '<i style="font-size: 1rem;" class="bi bi-pencil"></i>',
+                                                                            [
+                                                                                'route' => route('iphone.update', $iphone),
+                                                                                'datas' => json_encode($iphone),
+                                                                            ],
+                                                                            'btn-sm',
+                                                                        ) }}
 
-                                                                    {{ \App\Helpers\ModalHelper::action(
-                                                                        'deleteIphone',
-                                                                        '<i style="font-size: 1rem;" class="bi bi-trash"></i>',
-                                                                        [
-                                                                            'route' => route('iphone.update', $iphone),
-                                                                            'datas' => json_encode($iphone),
-                                                                            'modele' => json_encode($iphone->modele),
-                                                                        ],
-                                                                        'btn-sm btn-danger text-danger rounded-circle',
-                                                                    ) }}
+                                                                        {{ \App\Helpers\ModalHelper::action(
+                                                                            'deleteIphone',
+                                                                            '<i style="font-size: 1rem;" class="bi bi-trash"></i>',
+                                                                            [
+                                                                                'route' => route('iphone.update', $iphone),
+                                                                                'datas' => json_encode($iphone),
+                                                                                'modele' => json_encode($iphone->modele),
+                                                                            ],
+                                                                            'btn-sm btn-danger text-danger rounded-circle',
+                                                                        ) }}
+                                                                    @endif
                                                                 </td>
                                                             </tr>
                                                         @endforeach

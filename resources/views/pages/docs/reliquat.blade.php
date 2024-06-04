@@ -70,7 +70,9 @@
                 @foreach ($reliquats_datas as $rd)
                     <tr>
                         <td class="text-center">{{ $rd->c_nom }}</td>
-                        <td class="text-center">{{ $rd->m_nom }} {{ $rd->m_type }} {{ $rd->m_memoire }} </td>
+                        <td class="text-center">{{ $rd->m_nom }} {{ $rd->m_type }} {{ $rd->m_memoire }}
+                            ({{ $rd->i_barcode }})
+                        </td>
                         <td class="text-center">
                             {{ number_format($rd->vc_prix, 0, '', ' ') }} <sup>F</sup>
                         </td>

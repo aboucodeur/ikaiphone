@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\StockHelper;
 use App\Helpers\VendreHelper;
 use App\Models\Client;
 use App\Models\Iphone;
@@ -13,30 +14,24 @@ use Illuminate\Support\Facades\DB;
 
 class VendreController extends Controller
 {
+    // OK
     public function index()
     {
         $en_id = auth()->user()->en_id;
         $clients = Client::query()->latest('created_at')->where('en_id', '=', $en_id)->orderBy('c_type')->get();
-        $vendres = Vendre::with(['client'])->whereHas('client', function ($query) use ($en_id) {
+        $vendres = Vendre::whereHas('client', function ($query) use ($en_id) {
             $query->where('en_id', '=', $en_id);
-        })->get();
+        })->latest('created_at')->get();
         return view('pages.vendre.index', compact('vendres', 'clients'));
     }
 
-    public function create()
-    {
-        $en_id = auth()->user()->en_id;
-        $clients = Client::query()->latest('created_at')->where('en_id', '=', $en_id)->orderBy('c_type')->get();
-        return view('pages.vendre.create', compact('clients'));
-    }
-
+    // OK
     public function store(Request $request)
     {
         $datas = $request->validate([
             'v_date' => ['required', 'date'],
             'c_id' => ['required', 'exists:clients,c_id']
         ]);
-
         $client = Client::findOrFail($datas['c_id']);
         $v_type_dict = [
             'SIMPLE' => 'SIM',
@@ -48,6 +43,7 @@ class VendreController extends Controller
         return redirect()->route('vendre.show', $v);
     }
 
+    // OK
     public function edit(Vendre $vendre)
     {
         $en_id = auth()->user()->en_id;
@@ -55,6 +51,7 @@ class VendreController extends Controller
         return view('pages.vendre.edit', compact('vendre', 'clients'));
     }
 
+    // OK
     public function update(Request $request, Vendre $vendre)
     {
         $datas = $request->validate([
@@ -65,138 +62,73 @@ class VendreController extends Controller
         return redirect()->route('vendre.index');
     }
 
+    // OK
     public function destroy(Vendre $vendre)
     {
         $vendre->delete();
         return redirect()->route('vendre.index');
     }
 
-    // ! fix : Affiche les iphones de l'entreprise donnee !
+    // OK
     public function show(Vendre $vendre)
     {
         $en_id = auth()->user()->en_id;
         $paniers = $vendre?->iphones;
-
-        $ids = $vendre->iphones()->pluck('iphones.i_id');
-        $vids = Iphone::whereHas('modele', function ($query) use ($en_id) {
-            $query->where('en_id', $en_id);
-        })->withCount('ventes')->get()->where('ventes_count', '>', 0)->pluck('i_id');
-        $rids = Iphone::whereHas('modele', function ($query) use ($en_id) {
-            $query->where('en_id', $en_id);
-        })->withCount('retour')->get()->where('retour_count', '>', 0)->pluck('i_ech_id');
-        $dont_show = [...$ids, ...$vids, ...$rids]; // ids des iphones non disponibles
-
-        $iphones = Iphone::whereHas('modele', function ($query) use ($en_id) {
-            $query->where('en_id', $en_id);
-        })->latest('created_at')->whereNotIn('iphones.i_id', [...$dont_show])->get(); // iphones disponibles
-
-        return view('pages.vendre.show', compact('vendre', 'iphones', 'paniers'));
-    }
-
-    // TODO : Verification de l'iphone lors de la vente
-    public function checkIphone(Request $request)
-    {
-        $en_id = auth()->user()->en_id;
-        $iphone = Iphone::whereHas('modele', function ($query) use ($en_id) {
-            $query->where('en_id', $en_id);
-        })->where('i_barcode', '=', $request->vbarcode)->first();
-
-        $retour = $iphone?->retour;
-        $ventes = $iphone?->ventes;
-
-        $html = "
-            <p class='m-0'>" . $iphone->modele->m_nom . " " . $iphone->modele->m_type . "(" . $iphone->modele->m_memoire . ") GO</p>
-            <p class='m-0'>En stock : " . (int)$iphone->modele->m_qte . "</p>
-            <p class='m-0'>Prix base : " . number_format($iphone->modele->m_prix, 0, '.', ' ') . " F</p>
-        ";
-
-        // si retourner pour : i_id
-        if ($retour) {
-            $html = '<p class="text-danger mt-3">Iphone Deja retourner</p>';
-            return response($html, 200)->header('Content-Type', 'text/html');
-        }
-
-        // si retour pour i_ech_id
-        $has_retour = Retour::query()->where('i_ech_id', '=', $iphone?->i_id)->where('en_id', '=', $en_id)->first();
-        if ($has_retour) $html = '<p class="text-danger mt-3">Cet iphone a remplacer une autres</p>';
-
-        // si vendu
-        if ($ventes?->count() > 0) {
-            $etat_commande = $ventes[0]->pivot->vc_etat;
-            if ($etat_commande > 0) $html = '<p class="text-danger mt-3">Iphone Deja vendu</p>';
-            else {
-                $html = '
-                <form class="mt-3" method="POST" action="' . route('vendre.remCommande', $ventes[0]->pivot->v_id) . '">
-                ' . csrf_field() . '
-                <input type="hidden" name="_method" value="DELETE">
-                <input type="hidden" name="i_id" value="' . $iphone->i_id . '">
-                <button type="submit" class="btn btn-sm btn-primary">
-                    <img src="/assets/images/svg/refresh-ccw.svg" alt="refresh">
-                    Annuler la commande !
-                </button>
-            </form>
-                ';
-            }
-            return response($html, 200)->header('Content-Type', 'text/html');
-        }
-
-        return response($html, 200)->header('Content-Type', 'text/html');
+        return view('pages.vendre.show', compact('vendre', 'paniers'));
     }
 
     /** COMMANDES */
 
-    // ! fix : AJOUTER UNE COMMANDE DE VENTE A LA VENTE !
+    // OK
     public function addCommande(Request $request, Vendre $vendre)
     {
         $en_id = auth()->user()->en_id;
         $datas = $request->validate([
             'prix' => ['numeric', 'required'],
             'vbarcode' => ['required'],
-            // 'color' => ['required']
         ]);
 
-        $iphone = Iphone::whereHas('modele', function ($query) use ($en_id) {
-            $query->where('en_id', $en_id);
-        })->where('i_barcode', '=', $datas['vbarcode'])->first();
-        $vendre->iphones()->attach($iphone->i_id, [
-            'vc_etat' => 0,
-            'vc_qte' => 1,
-            'vc_prix' => $datas['prix'],
-            // 'vc_color' => $datas['color'],
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
+        $iphone = StockHelper::findIphoneByBarcode($datas['vbarcode'], $en_id);
+        $etat_iphone = StockHelper::iphoneEtat($iphone);
 
-        return redirect()->back();
+        // dd($etat_iphone);
+
+        // ne pas oublier === null
+        if (($etat_iphone['etat'] === -200 && empty($etat_iphone['action']) && empty($etat_iphone['is_rep'])) || in_array('V', $etat_iphone['action'])) {
+            $vendre->iphones()->attach($iphone?->i_id, [
+                'vc_etat' => 0,
+                'vc_qte' => 1,
+                'vc_prix' => $datas['prix'],
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
+        return redirect()->route('vendre.show', $vendre);
     }
 
+    // OK
     public function remCommande(Request $request, Vendre $vendre)
     {
         $vendre->iphones()->detach([$request->input('i_id')]);
-        return redirect()->back();
+        return redirect()->route('vendre.show', $vendre);
     }
 
+    // OK
     public function validCommande(Vendre $vendre)
     {
-        $type_vente = $vendre->v_type;
-        $is_simple = $type_vente === 'SIM';
-
         if ($vendre->v_etat < 1) {
-            // SIM & REV
-            $vendre->update(['v_etat' => 1]);
-            foreach ($vendre->iphones as $iphone) {
-                // Transaction pour la mise a jour
-                DB::transaction(function () use ($iphone, $is_simple) {
+            DB::transaction(function () use ($vendre) {
+                $vendre->update(['v_etat' => 1]);
+                foreach ($vendre->iphones as $iphone) {
                     $iphone->pivot->update(['vc_etat' => 1]);
-                    if ($is_simple) $iphone->modele->update(['m_qte' => DB::raw('m_qte - 1')]);
-                });
-            }
-            return redirect()->back();
+                    $iphone->modele->decrement('m_qte');
+                }
+            });
         }
-
-        return redirect()->back();
+        return redirect()->route('vendre.show', $vendre);
     }
 
+    // OK
     public function editCommande(Request $request, Vendre $vendre)
     {
         $datas = $request->validate([
@@ -204,44 +136,65 @@ class VendreController extends Controller
             'i_id' => ['required', 'exists:iphones,i_id']
         ]);
 
-        $etat_vente = $vendre->v_etat;
-
         $iphone = $vendre->iphones()->findOrFail($datas['i_id']);
         $type = $datas['type'];
-        $cetat = $iphone->pivot->vc_etat;
+        $etat_vente = $vendre->v_etat;
+        $etat_iphone = StockHelper::iphoneEtat($iphone);
 
+        // si la vente est valider
         if ($etat_vente > 0) {
-            // Revendeur : Vendu
-            if ($type == 'vendu') {
-                if ($cetat == 1) {
-                    $iphone->pivot->update(['vc_etat' => 2]);
-                    $iphone->modele->update(['m_qte' => DB::raw('m_qte - 1')]); // dimunie le stock
-                }
-            }
+            switch ($type) {
+                case 'R':
+                    if (in_array('R', $etat_iphone['action'])) {
+                        $iphone->pivot->update(['vc_etat' => 2]);
+                        StockHelper::iphoneUpdate($iphone, 'R');
+                    }
+                    break;
+                case 'E':
+                    // etat du premier iphone
+                    if (in_array('E', $etat_iphone['action'])) {
+                        $en_id = auth()->user()->en_id;
+                        $ip_ech_id = $request->ip_ech_id;
+                        $ip_ech_desc = $request->ip_ech_desc ?? 'Pas connus';
 
-            // Revendeur : Rendu
-            if ($type == 'rendu') {
-                // valider -> rendu
-                if ($cetat == 1) $iphone->pivot->update(['vc_etat' => 3]); // rien car pas vendu en amont
-                // vendu -> a rendu
-                if ($cetat == 2) {
-                    $iphone->pivot->update(['vc_etat' => 3]);
-                    $iphone->modele->update(['m_qte' => DB::raw('m_qte + 1')]); // augmente le stock car dimunier en amont
-                }
-            }
+                        $ip_remp = $ip_ech_id ? StockHelper::findIphoneByBarcode($ip_ech_id, $en_id) : null;
 
-            return redirect()->back();
+                        if ($ip_remp && $iphone->i_barcode !== $ip_remp->i_barcode) { // pas le meme code bare
+                            $etat_ip_remp = StockHelper::iphoneEtat($ip_remp);
+                            // cas ou l'on peut echanger l'iphone
+                            // ne pas oublier null
+                            if (($etat_ip_remp['etat'] === -200 && empty($etat_ip_remp['action'])) || in_array('E', $etat_ip_remp['action'])) {
+                                // dd("Oui c'est un arrivage on peut remplacer");
+                                // creation du retour et mettre a jour l'etat du commande
+                                DB::transaction(function () use ($iphone, $ip_remp, $en_id, $ip_ech_desc) {
+                                    $iphone->pivot->update(['vc_etat' => 3]);
+                                    Retour::create([
+                                        're_date' => now(),
+                                        're_motif' => $ip_ech_desc,
+                                        'i_id' => $iphone->i_id,
+                                        'i_ech_id' => $ip_remp->i_id,
+                                        'en_id' => $en_id
+                                    ]);
+                                });
+                            }
+                        }
+                    }
+                    break;
+            }
         }
+
+        return redirect()->route('vendre.show', $vendre);
     }
 
     /** PAIEMENTS */
     public function paiementPage(Vendre $vendre, Iphone $iphone)
     {
-        $commandes = $vendre->iphones;
+        // $commandes = $vendre->iphones;
         $paiements = $vendre->paiements()->where('i_id', '=', $iphone->i_id)->get();
         return view('pages.vendre.paiement', compact('vendre', 'iphone', 'paiements'));
     }
 
+    // OK
     public function addPaiement(Request $request, Vendre $vendre)
     {
         $v_id = $vendre->v_id;
@@ -256,9 +209,8 @@ class VendreController extends Controller
             $datas['v_id'] = $v_id;
             $datas['vp_date'] = now();
             Vpaiement::create($datas);
-            return redirect()->back();
         }
-        return redirect()->back();
+        return redirect()->route('vendre.show', $vendre);
     }
 
     public function validPaiement(Vpaiement $vpaiement)
@@ -271,5 +223,26 @@ class VendreController extends Controller
     {
         $vpaiement->delete();
         return redirect()->back();
+    }
+
+    // OK
+    public function checkIphone(Request $request)
+    {
+        $html = '';
+        $en_id = auth()->user()->en_id;
+        $iphone = StockHelper::findIphoneByBarcode($request->vbarcode, $en_id);
+
+        if (!$iphone) $html = '<p>Cet iPhone n\'existe pas dans la boutique !</p>';
+        else {
+            $etat_iphone = StockHelper::etat($iphone);
+            $html = "
+                <p class='m-0'>" . $iphone->modele->m_nom . " " . $iphone->modele->m_type . "(" . $iphone->modele->m_memoire . ") GO</p>
+                <p class='m-0'>En stock : " . (int)$iphone->modele->m_qte . "</p>
+                <p class='m-0'>Etat de l'iphone : " . $etat_iphone . "</p>
+                <p class='m-0'>Prix base : " . number_format($iphone->modele->m_prix, 0, '.', ' ') . " F</p>
+
+            ";
+        }
+        return response($html, 200)->header('Content-Type', 'text/html');
     }
 }

@@ -2,7 +2,7 @@
 
 @section('fpanier')
     @if ($vendre->v_etat < 1)
-        <x-fpanier route="{{ route('vendre.addCommande', $vendre) }}" :iphones="[...$iphones]" />
+        <x-fpanier route="{{ route('vendre.addCommande', $vendre) }}" />
     @endif
 @endsection
 
@@ -11,10 +11,9 @@
         @foreach ($paniers as $iphone)
             @php
                 $cpaiement = App\Helpers\VendreHelper::paiementCommande($iphone);
-                $etat_cmd = App\Helpers\VendreHelper::etatCommande($vendre, $iphone);
             @endphp
             <tr>
-                <td class="w-30">
+                <td class="w-25">
                     <strong style="text-transform: uppercase" class="text-primary">
                         {{ $iphone->modele->m_nom }}
                         {{ $iphone->modele->m_type }} /
@@ -22,61 +21,73 @@
                         {{ $iphone->i_barcode }}
                     </strong>
                 </td>
-                <td class="w-5 {{ $etat_cmd == 'rendu' ? 'text-danger' : '' }}">
-                    <strong>{{ $etat_cmd }}</strong>
+                <td class="w-1">
+                    <strong>
+                        {{ \App\Helpers\StockHelper::etat_fixe($iphone) }}
+                    </strong>
                 </td>
                 <td>
-                    {{ number_format(((int) $cpaiement['cmontant']), 0, '', ' ') }}
-                    <sub>F</sub>
-                    / R :
-                    {{ number_format((int) $cpaiement['creste'], 0, '', ' ') }}
-                    <sub>F</sub>
+                    @if ((int) $cpaiement['cmontant'] === 0)
+                        <span>-/-</span>
+                    @else
+                        {{ number_format(((int) $cpaiement['cmontant']), 0, '', ' ') }}
+                        <sub>F</sub>
+                    @endif
                 </td>
-                <td class="">
-                    <div class="col-lg-12">
+                <td>
+                    <div>
                         @if ($vendre->v_etat > 0)
-                            <div class="d-flex flex-wrap gap-1">
-                                <a title="Payer" role="button"
-                                    href="{{ route('vendre.paiement.index', [$vendre, $iphone]) }}"
-                                    class="btn btn-sm btn-success" role="button">
-                                    @if ($cpaiement['creste'] == 0)
-                                        Voir
-                                    @endif
-                                    <i class="bi bi-cash-stack"></i>
-                                </a>
+                            <div class="d-flex w-100 align-items-center flex-wrap gap-1">
+                                {{-- Afficher le bouton de paiement si l'etat est a 1 --}}
+                                @if (\App\Helpers\StockHelper::etat_fixe($iphone) === 'valider')
+                                    <a title="Payer" role="button"
+                                        href="{{ route('vendre.paiement.index', [$vendre, $iphone]) }}"
+                                        class="btn btn-sm btn-success" role="button">
+                                        PAIE
+                                        <i class="bi bi-cash-stack"></i>
+                                    </a>
+                                @endif
 
-                                @if ($vendre->v_type === 'REV')
+                                {{-- @if ($vendre->v_type === 'REV') --}}
+                                @if ($iphone->pivot->vc_etat < 2)
                                     <form method="POST" action="{{ route('vendre.editCommande', $iphone->pivot->v_id) }}">
                                         @csrf
                                         @method('PUT')
                                         <input type="hidden" name="i_id" value="{{ $iphone->i_id }}">
-                                        <input type="hidden" name="type" value="vendu">
-                                        <button title="Vendu" type="submit" class="btn btn-sm btn-primary">
-                                            <i class="bi bi-box-arrow-right"></i>
-                                        </button>
-                                    </form>
-
-                                    <form method="POST" action="{{ route('vendre.editCommande', $iphone->pivot->v_id) }}">
-                                        @csrf
-                                        @method('PUT')
-                                        <input type="hidden" name="i_id" value="{{ $iphone->i_id }}">
-                                        <input type="hidden" name="type" value="rendu">
-                                        <button title="Rendu" type="submit" class="btn btn-sm btn-warning">
-                                            <i class="bi bi-box-arrow-left"></i>
+                                        <input type="hidden" name="type" value="R">
+                                        <button title="Rendre" type="submit" class="btn btn-sm btn-primary">
+                                            RENDRE &nbsp; <i class="bi bi-box-arrow-left"></i>
                                         </button>
                                     </form>
                                 @endif
 
+                                {{-- Verifcation ici : si --}}
+                                @if ($iphone->pivot->vc_etat < 3 && \App\Helpers\StockHelper::iphoneEtat($iphone)['is_latest'])
+                                    {{ \App\Helpers\ModalHelper::action(
+                                        'addEchange',
+                                        'ECHANGER &nbsp;<img width="13px" src="/assets/images/svg/arrow-down-up.svg" alt="Arrow down up icon">',
+                                        [
+                                            'route' => route('vendre.editCommande', $iphone->pivot->v_id),
+                                            'i_id' => $iphone->i_id,
+                                            'type' => 'E',
+                                        ],
+                                        'btn btn-sm btn-warning',
+                                    ) }}
+                                @endif
+                                {{-- @endif --}}
+
                             </div>
                         @endif
                     </div>
+
+                    {{-- Retirer si la vente est en cours --}}
                     @if ($vendre->v_etat < 1)
                         <form method="POST" action="{{ route('vendre.remCommande', $iphone->pivot->v_id) }}">
                             @csrf
                             @method('DELETE')
                             <input type="hidden" name="i_id" value="{{ $iphone->i_id }}">
                             <button type="submit" class="btn btn-sm">
-                                <i class="text-danger" data-feather="trash"></i>
+                                Retirer <i class="text-danger" data-feather="trash"></i>
                             </button>
                         </form>
                     @endif

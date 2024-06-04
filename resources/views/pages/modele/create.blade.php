@@ -64,8 +64,8 @@
     <div class="col-lg-12">
         <div class="mb-3">
             <label for="m_ids" class="form-label" id="label_m_ids">Description ! (0 scannés)</label>
-            <textarea placeholder="Scanner les iphones " minlength="17" onkeypress="return (event.key!='Enter')" class="form-control" name="m_ids" id="m_ids"
-                rows="4" oninput="updateCount()"></textarea>
+            <textarea placeholder="Scanner les iphones " minlength="8" onkeypress="return (event.key!='Enter')"
+                class="form-control" name="m_ids" id="m_ids" rows="4" oninput="updateCount()"></textarea>
         </div>
     </div>
 </div>

@@ -102,7 +102,7 @@
                         <tr>
                             <td>{{ Str::upper($v->c_nom) }}</td>
                             <td class="strong">{{ $v->m_nom }} / {{ $v->m_type }} /
-                                {{ $v->m_memoire }} (GO)</td>
+                                {{ $v->m_memoire }} (GO) / {{ $v->i_barcode }}</td>
                             {{-- <td>{{ $v->i_barcode }}</td> --}}
                             <td style="text-align: center">{{ number_format($v->montant, 0, '', ' ') }} <sub>F</sub>
                             </td>

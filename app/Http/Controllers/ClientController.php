@@ -46,7 +46,7 @@ class ClientController extends Controller
         $data = $request->validate([
             'c_nom' => ['required', 'max:100'],
             'c_type' => ['required', 'max:25'],
-            'c_adr' => ['min:5'],
+            'c_adr' => [''],
             'c_tel' => ['max:25'],
         ]);
         $en_id = Auth::user()->entreprise->en_id;

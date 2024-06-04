@@ -7,7 +7,7 @@
         </a>
 
         <!-- Shortcut -->
-        <ul class="list-unstyled m-0 p-0">
+        <ul class="list-unstyled m-0 p-0 mb-0">
             <li class="dropdown">
                 <a class="rounded-circle m-1" href="" role="button" id="dropdownUser" data-bs-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="false">
@@ -39,6 +39,7 @@
                 </div>
             </li>
         </ul>
+
 
         <!--Navbar nav -->
         <ul class="navbar-nav navbar-right-wrap ms-lg-auto d-flex nav-top-wrap align-items-center ms-4 ms-lg-0">
