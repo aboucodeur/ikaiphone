@@ -17,12 +17,5 @@
         <label for="ip_ech_id" class="form-label">Nouvel iPhone (*)</label>
         <input required onkeypress="return (event.key!='Enter')" autofocus type="text" class="form-control"
             name="ip_ech_id" id="ip_ech_id" placeholder="Code IMEI">
-        {{-- <button type="submit" class="btn btn-sm btn-primary w-100 text-white fw-bold mt-3"
-            hx-get="{{ route('retour.checkIphone') }}" hx-target="#info_iphone" hx-trigger="click"
-            hx-include="[name='ip_ech_id']" hx-headers='{"X-CSRF-TOKEN": "{{ csrf_token() }}"}'>
-            VERIFIER IMEI
-            <i class="bi bi-upc-scan"></i>
-        </button>
-        <div id="info_iphone"></div> --}}
     </div>
 </div>
